@@ -1,2 +1,2 @@
 # CS183-Group-Game
-repo for our game
+Repo for our game files
