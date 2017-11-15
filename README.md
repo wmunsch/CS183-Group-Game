@@ -1,2 +1,1 @@
-# CS183-Group-Game
-Repo for our game files
+Repo for our game in csci 183
