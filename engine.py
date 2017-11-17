@@ -4,22 +4,8 @@ import pygame
 pygame.init()
 screen = pygame.display.set_mode((1280, 700))
 done = False
-x=640
-y=350
-
-
-
-#theChar = pygame.image.load('graphics/character.png')
-#theChar = pygame.transform.scale(theChar,(76,112))
-#floortile = pygame.image.load('graphics/floortile.png')
-#floortile = pygame.transform.scale(floortile,(100,100))
-
-#room1 = pygame.image.load('desktop/graphics/room1.png')
-#room1 = room1.convert()
-#room1 = pygame.transform.scale(room1,(1280,720))
 framerate = pygame.time.Clock()
 
-#def createRoom():
     
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -37,12 +23,6 @@ class Player(pygame.sprite.Sprite):
             self.rect.move_ip(-5, 0)
         if pressed_keys[pygame.K_RIGHT]:
             self.rect.move_ip(5, 0)
-            
-           
-        
-    #def move(self, dx, dy):
-      #  self.
-        
         
     x = 640
     y = 350
@@ -61,6 +41,8 @@ class room1:
     roomimage = pygame.image.load('graphics/room2.png')
     roomimage = roomimage.convert()
     roomimage = pygame.transform.scale(roomimage,(1280,720))
+    wallLeft = pygame.Rect(0,0,100,1280)
+    
     wallup = 60
     walldown = 500
     wallleft = 100
@@ -69,6 +51,11 @@ class room1:
 
 player = Player()
 firstroom = room1()
+
+sprites = pygame.sprite.Group()
+## add sprites to this group to draw them to the screen
+sprites.add(player)
+
 while not done:
         for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -88,15 +75,20 @@ while not done:
         #    if player.x <= firstroom.wallright:player.x+= 4
 
         pressed_keys = pygame.key.get_pressed()
-
-        player.update(pressed_keys)
+        currentMap = firstroom
+        if (player.rect.left < currentMap.wallLeft.right):
+            player.update(pressed_keys)
         
-        screen.fill((0,0,0))
+        #screen.fill((0,0,0)) dont use anymore
         screen.blit(firstroom.roomimage,(0,0))
-        #screen.blit(floortile,(100,100)) 
-        #screen.blit(floortile,(200,200))
-        screen.blit(player.surf,player.rect)#,(player.x,player.y))
+       
+        for entity in sprites:
+            screen.blit(entity.surf, entity.rect)
+           
+        #use the following for collision detection between player and enemies
+        #if pygame.sprite.spritecollideany(player, enemies):
+            #player.kill()
+        
 
-        #surface = pygame.image.load('graphics/character.png')
         pygame.display.flip()
         framerate.tick(60) #sets the framerate to 60 fps
