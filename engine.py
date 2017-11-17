@@ -9,8 +9,8 @@ y=350
 
 
 
-theChar = pygame.image.load('graphics/character.png')
-theChar = pygame.transform.scale(theChar,(76,112))
+#theChar = pygame.image.load('graphics/character.png')
+#theChar = pygame.transform.scale(theChar,(76,112))
 #floortile = pygame.image.load('graphics/floortile.png')
 #floortile = pygame.transform.scale(floortile,(100,100))
 
@@ -21,10 +21,36 @@ framerate = pygame.time.Clock()
 
 #def createRoom():
     
-class Player:
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        super(Player, self).__init__()
+        self.surf = pygame.image.load('graphics/character.png')
+        self.surf = pygame.transform.scale(self.surf,(76,112))
+        self.rect = self.surf.get_rect()
+        
+    def update(self, pressed_keys):
+        if pressed_keys[pygame.K_UP]:
+            self.rect.move_ip(0, -5)
+        if pressed_keys[pygame.K_DOWN]:
+            self.rect.move_ip(0, 5)
+        if pressed_keys[pygame.K_LEFT]:
+            self.rect.move_ip(-5, 0)
+        if pressed_keys[pygame.K_RIGHT]:
+            self.rect.move_ip(5, 0)
+            
+           
+        
+    #def move(self, dx, dy):
+      #  self.
+        
+        
     x = 640
     y = 350
     health = 10
+    
+    
+
+    
     
 class Goblin:
     x = 0
@@ -49,24 +75,27 @@ while not done:
                         done = True
 
         ##basic controls
-        pressed = pygame.key.get_pressed()
+        #pressed = pygame.key.get_pressed()
         
         
-        if pressed[pygame.K_UP]: 
-            if player.y >= firstroom.wallup:player.y -= 4
-        if pressed[pygame.K_DOWN]: 
-            if player.y <= firstroom.walldown:player.y+= 4
-        if pressed[pygame.K_LEFT]: 
-            if player.x >= firstroom.wallleft:player.x -= 4
-        if pressed[pygame.K_RIGHT]:
-            if player.x <= firstroom.wallright:player.x+= 4
+        #if pressed[pygame.K_UP]: 
+        #    if player.y >= firstroom.wallup:player.y -= 4
+        #if pressed[pygame.K_DOWN]: 
+        #    if player.y <= firstroom.walldown:player.y+= 4
+        #if pressed[pygame.K_LEFT]: 
+       #     if player.x >= firstroom.wallleft:player.x -= 4
+       # if pressed[pygame.K_RIGHT]:
+        #    if player.x <= firstroom.wallright:player.x+= 4
 
-            
+        pressed_keys = pygame.key.get_pressed()
+
+        player.update(pressed_keys)
+        
         screen.fill((0,0,0))
         screen.blit(firstroom.roomimage,(0,0))
         #screen.blit(floortile,(100,100)) 
         #screen.blit(floortile,(200,200))
-        screen.blit(theChar,(player.x,player.y))
+        screen.blit(player.surf,player.rect)#,(player.x,player.y))
 
         #surface = pygame.image.load('graphics/character.png')
         pygame.display.flip()
