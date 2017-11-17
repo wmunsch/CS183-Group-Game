@@ -9,10 +9,10 @@ y=350
 
 
 
-theChar = pygame.image.load('desktop/graphics/character.png')
+theChar = pygame.image.load('graphics/character.png')
 theChar = pygame.transform.scale(theChar,(76,112))
-floortile = pygame.image.load('desktop/graphics/floortile.png')
-floortile = pygame.transform.scale(floortile,(100,100))
+#floortile = pygame.image.load('graphics/floortile.png')
+#floortile = pygame.transform.scale(floortile,(100,100))
 
 #room1 = pygame.image.load('desktop/graphics/room1.png')
 #room1 = room1.convert()
@@ -32,7 +32,7 @@ class Goblin:
     health = 3
     
 class room1:
-    roomimage = pygame.image.load('desktop/graphics/room1.png')
+    roomimage = pygame.image.load('graphics/room2.png')
     roomimage = roomimage.convert()
     roomimage = pygame.transform.scale(roomimage,(1280,720))
     wallup = 60
@@ -64,8 +64,8 @@ while not done:
             
         screen.fill((0,0,0))
         screen.blit(firstroom.roomimage,(0,0))
-        screen.blit(floortile,(100,100)) 
-        screen.blit(floortile,(200,200))
+        #screen.blit(floortile,(100,100)) 
+        #screen.blit(floortile,(200,200))
         screen.blit(theChar,(player.x,player.y))
 
         #surface = pygame.image.load('graphics/character.png')
