@@ -15,7 +15,7 @@ class Player(pygame.sprite.Sprite):
         self.animation_speed = 10
         self.animation_speed = self.animation_speed
         self.rect = self.surf.get_rect()
-        self.rect.move_ip(600,400)
+        self.rect.move_ip(600,400) #player spawn point
         self.walk_up_ani = [pygame.transform.scale(pygame.image.load('graphics/player_walking_upF1.png'),(92,124)),
             pygame.transform.scale(pygame.image.load('graphics/player_walking_upF2.png'),(92,124)),
             pygame.transform.scale(pygame.image.load('graphics/player_walking_upF3.png'),(92,124)),
@@ -185,7 +185,7 @@ while not done:
         #if (player.rect.left < currentmap.wallLeft.right):
            #player.rect.move_ip(5, 0)
 
-        ##using this method of collision i dont know how to make walls in the middle of the screen
+     
         if (checkCollision(pygame.sprite.Sprite, player,currentroom.wallLeft1) or checkCollision(pygame.sprite.Sprite, player,currentroom.wallLeft2)):
             player.leftspeed =0
             #player.rect.move_ip(5, 0)
@@ -214,7 +214,7 @@ while not done:
             
             
         player.update(pressed_keys)
-
+        #print(player.rect.x)
         #screen.fill((0,0,0)) dont use anymore
         screen.blit(firstroom.roomimage,(0,0))
 
