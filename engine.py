@@ -15,7 +15,7 @@ class Player(pygame.sprite.Sprite):
         self.animation_speed = 10
         self.animation_speed = self.animation_speed
         self.rect = self.surf.get_rect()
-        self.rect.move_ip(400,0)
+        self.rect.move_ip(600,400)
         self.walk_up_ani = [pygame.transform.scale(pygame.image.load('graphics/player_walking_upF1.png'),(92,124)),
             pygame.transform.scale(pygame.image.load('graphics/player_walking_upF2.png'),(92,124)),
             pygame.transform.scale(pygame.image.load('graphics/player_walking_upF3.png'),(92,124)),
@@ -41,7 +41,11 @@ class Player(pygame.sprite.Sprite):
     def update(self, pressed_keys):
 ######### walking up animation ##############
         if pressed_keys[pygame.K_UP]:
-            self.rect.move_ip(0, -self.speed)
+            self.leftspeed = 4
+            self.rightspeed = 4
+            self.downspeed = 4
+            self.direction = 1
+            self.rect.move_ip(0, -self.upspeed)
             self.time += 1
             if (self.time % 12 == 0):
                 if(self.current_frame>2):
@@ -53,7 +57,11 @@ class Player(pygame.sprite.Sprite):
 
 ######### walking down animation ##############
         elif pressed_keys[pygame.K_DOWN]:
-            self.rect.move_ip(0, self.speed)
+            self.leftspeed = 4
+            self.rightspeed = 4
+            self.upspeed = 4
+            self.direction = 3
+            self.rect.move_ip(0, self.downspeed)
             self.time += 1
             if (self.time % 12 == 0):
                 if(self.current_frame>2):
@@ -65,7 +73,11 @@ class Player(pygame.sprite.Sprite):
 
 ######### walking left animation ##############
         elif pressed_keys[pygame.K_LEFT]:
-            self.rect.move_ip(-self.speed, 0)
+            self.rightspeed = 4
+            self.rightspeed = 4
+            self.upspeed = 4
+            self.direction = 4
+            self.rect.move_ip(-self.leftspeed, 0)
             self.time += 1
             if (self.time % 12 == 0):
                 if(self.current_frame>2):
@@ -77,7 +89,11 @@ class Player(pygame.sprite.Sprite):
 
 ######### walking right animation ##############
         elif pressed_keys[pygame.K_RIGHT]:
-            self.rect.move_ip(self.speed, 0)
+            self.leftspeed = 4
+            self.downspeed = 4
+            self.upspeed = 4
+            self.direction = 2
+            self.rect.move_ip(self.rightspeed, 0)
             self.time += 1
             if (self.time % 12 == 0):
                 if(self.current_frame>2):
@@ -89,9 +105,14 @@ class Player(pygame.sprite.Sprite):
 
 
     speed = 4
+    leftspeed = 4
+    rightspeed =4
+    downspeed =4
+    upspeed =4
     x = 640
     y = 350
     health = 10
+    direction = 1
 
 
 
@@ -120,7 +141,8 @@ class room1:
     wallTop2 = Wall(720,0,560,50)
     wallBottom1 = Wall(0,610,1280,50)
     wallBottom2 = Wall(0,0,0,0)
-    wallMiddle = Wall(200,0,200,300)
+    wallMiddle = Wall(300,0,180,330)
+    
 
 
 
@@ -165,14 +187,32 @@ while not done:
 
         ##using this method of collision i dont know how to make walls in the middle of the screen
         if (checkCollision(pygame.sprite.Sprite, player,currentroom.wallLeft1) or checkCollision(pygame.sprite.Sprite, player,currentroom.wallLeft2)):
-            player.rect.move_ip(5, 0)
+            player.leftspeed =0
+            #player.rect.move_ip(5, 0)
         if (checkCollision(pygame.sprite.Sprite, player,currentroom.wallRight1) or checkCollision(pygame.sprite.Sprite, player,currentroom.wallRight2)):
-            player.rect.move_ip(-5, 0)
+            player.rightspeed =0
+            #player.rect.move_ip(-5, 0)
         if (checkCollision(pygame.sprite.Sprite, player,currentroom.wallTop1) or checkCollision(pygame.sprite.Sprite, player,currentroom.wallTop2)):
-            player.rect.move_ip(0, 5)
+            player.upspeed = 0
+            #player.rect.move_ip(0, 5)
         if (checkCollision(pygame.sprite.Sprite, player,currentroom.wallBottom1) or checkCollision(pygame.sprite.Sprite, player,currentroom.wallBottom2)):
-            player.rect.move_ip(0, -5)
-
+            player.downspeed = 0
+            #player.rect.move_ip(0, -5)
+        if (checkCollision(pygame.sprite.Sprite, player, currentroom.wallMiddle)):
+            if (player.direction == 1): 
+                player.upspeed =0
+                player.rect.move_ip(0, 1)
+            if (player.direction==2): 
+                player.rightspeed = 0
+                player.rect.move_ip(-1, 0)
+            if (player.direction==3): 
+                player.downspeed = 0
+                player.rect.move_ip(0, -1)
+            if (player.direction ==4):
+                player.leftspeed =0
+                player.rect.move_ip(1, 0)
+            
+            
         player.update(pressed_keys)
 
         #screen.fill((0,0,0)) dont use anymore
