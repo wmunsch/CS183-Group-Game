@@ -2,7 +2,10 @@
 import pygame
 
 pygame.init()
-screen = pygame.display.set_mode((1280, 700))
+screen = pygame.display.set_mode((1280, 720))
+blackFadeScreen = pygame.Surface((1280,720))
+#blackFadeScreen.fill((255,255,255))
+#blackFadeScreen.setAlpha()
 done = False
 framerate = pygame.time.Clock()
 
@@ -73,7 +76,7 @@ class Player(pygame.sprite.Sprite):
 
 ######### walking left animation ##############
         elif pressed_keys[pygame.K_LEFT]:
-            self.rightspeed = 4
+            self.downspeed = 4
             self.rightspeed = 4
             self.upspeed = 4
             self.direction = 4
@@ -139,40 +142,149 @@ class room1:
     wallRight2 = Wall(1180,420,100,160)
     wallTop1 = Wall(0,0,570,50)
     wallTop2 = Wall(720,0,560,50)
-    wallBottom1 = Wall(0,610,1280,50)
+    wallBottom1 = Wall(0,600,1280,60)
     wallBottom2 = Wall(0,0,0,0)
     wallMiddle = Wall(300,0,180,330)
-    
+    wallMiddle2 = Wall(0,0,0,0)
+    wallMiddle3 = Wall(0,0,0,0)
+    topDoor = Wall(570,0,150,10)
+    bottomDoor = Wall(0,0,0,0)
+    rightDoor = Wall(1200,240,100,180)
+    leftDoor = Wall(0,0,0,0)
 
 
+class Room2:
+    def __init__(self,imagepath):
+        self.roomimage = pygame.image.load(imagepath)
+        self.roomimage = self.roomimage.convert()
+        self.roomimage = pygame.transform.scale(self.roomimage,(1280,720))
+    wallLeft1 = Wall(0,0,100,720)
+    wallLeft2 = Wall(0,0,0,0)
+    wallRight1 = Wall(1180,0,100,240)
+    wallRight2 = Wall(1180,420,100,160)
+    wallTop1 = Wall(0,0,1280,50)
+    wallTop2 = Wall(0,0,0,0)
+    wallBottom1 = Wall(0,600,570,50)
+    wallBottom2 = Wall(720,600,560,50)
+    wallMiddle = Wall(310,300,160,130)
+    wallMiddle2 = Wall(790,300,160,130)
+    wallMiddle3 = Wall(0,0,0,0)
+    topDoor = Wall(0,0,0,0)
+    bottomDoor = Wall(570,620,150,40)
+    rightDoor = Wall(1180,240,100,180)
+    leftDoor = Wall(0,0,0,0)
 
-    #wallup = 60
-    #walldown = 500
-    #wallleft = 100
-    #wallright = 1100
+class Room3:
+    def __init__(self,imagepath):
+        self.roomimage = pygame.image.load(imagepath)
+        self.roomimage = self.roomimage.convert()
+        self.roomimage = pygame.transform.scale(self.roomimage,(1280,720))
+    wallLeft1 = Wall(0,0,100,240)
+    wallLeft2 = Wall(0,420,100,160)
+    wallRight1 = Wall(1180,0,100,720)
+    wallRight2 = Wall(0,0,0,0)
+    wallTop1 = Wall(0,0,570,50)
+    wallTop2 = Wall(720,0,560,50)
+    wallBottom1 = Wall(0,600,1280,60)
+    wallBottom2 = Wall(0,0,0,0)
+    wallMiddle = Wall(0,0,0,0)
+    wallMiddle2 = Wall(0,0,0,0)
+    wallMiddle3 = Wall(0,0,0,0)
+    topDoor = Wall(570,0,150,10)
+    bottomDoor = Wall(0,0,0,0)
+    rightDoor = Wall(0,0,0,0)
+    leftDoor = Wall(0,240,70,180)
+
+
+class Room4:
+    def __init__(self,imagepath):
+        self.roomimage = pygame.image.load(imagepath)
+        self.roomimage = self.roomimage.convert()
+        self.roomimage = pygame.transform.scale(self.roomimage,(1280,720))
+    wallLeft1 = Wall(0,0,100,240)
+    wallLeft2 = Wall(0,420,100,160)
+    wallRight1 = Wall(1180,0,100,720)
+    wallRight2 = Wall(0,0,0,0)
+    wallTop1 = Wall(0,0,570,50)
+    wallTop2 = Wall(720,0,560,50)
+    wallBottom1 = Wall(0,600,570,50)
+    wallBottom2 = Wall(720,600,560,50)
+    wallMiddle = Wall(0,0,0,0)
+    wallMiddle2 = Wall(0,0,0,0)
+    wallMiddle3 = Wall(0,0,0,0)
+    topDoor = Wall(570,0,150,10)
+    bottomDoor = Wall(570,620,150,40)
+    rightDoor = Wall(0,0,0,0)
+    leftDoor = Wall(0,240,70,180)
+
+class Bossroom:
+    def __init__(self,imagepath):
+        self.roomimage = pygame.image.load(imagepath)
+        self.roomimage = self.roomimage.convert()
+        self.roomimage = pygame.transform.scale(self.roomimage,(1280,720))
+    wallLeft1 = Wall(0,0,100,720)
+    wallLeft2 = Wall(0,0,0,0)
+    wallRight1 = Wall(1180,0,100,720)
+    wallRight2 = Wall(0,0,0,0)
+    wallTop1 = Wall(0,0,1280,50)
+    wallTop2 = Wall(0,0,0,0)
+    wallBottom1 = Wall(0,600,570,50)
+    wallBottom2 = Wall(720,600,560,50)
+    wallMiddle = Wall(0,200,460,110)
+    wallMiddle2 = Wall(800,200,500,110)
+    wallMiddle3 = Wall(460,100,400,110)
+    topDoor = Wall(0,0,0,0)
+    bottomDoor = Wall(570,620,150,40)
+    rightDoor = Wall(0,0,0,0)
+    leftDoor = Wall(0,0,0,0)
 
 
 #use this to update the current room when changing rooms
 #def updateCurrentRoom(room):
-#    currentroom = room
+    #currentroom = room
+def changeRooms(roomName):
+    timer = 0
+    global currentroom
+    currentroom = roomName
+    #blackFadeScreen.set_alpha(0)
+    #screen.blit(blackFadeScreen,(0,0))
+    #while timer < 2550:
+        #timer+=1
+        #print(timer)
+        #blackFadeScreen.set_alpha(timer%10)
+        #blackFadeScreen.set_alpha(100)
+        #screen.blit(blackFadeScreen,(0,0))
 
+
+fadeAlpha = 1
 
 def checkCollision(self, sprite1, sprite2):
     col = pygame.sprite.collide_rect(sprite1, sprite2)
     return(col)
 
 
+
+
 player = Player()
 firstroom = room1()
+secondroom = Room2('graphics/room4.png')
+thirdroom = Room3('graphics/room5.png')
+fourthroom = Room4('graphics/room6.png')
+bossroom = Bossroom('graphics/bossroom3.png')
 currentroom = firstroom
 sprites_alive = pygame.sprite.Group()
 sprites_walls = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
-## add sprites to this group to draw them to the screen
+
+## add monster sprites to this group to draw them to the screen
 sprites_alive.add(player)
+
+
 
 sprites_walls.add(firstroom.wallLeft1)
 all_sprites.add(sprites_alive,sprites_walls)
+
+fade = False
 
 while not done:
         for event in pygame.event.get():
@@ -182,48 +294,69 @@ while not done:
 
         pressed_keys = pygame.key.get_pressed()
 
-        #if (player.rect.left < currentmap.wallLeft.right):
-           #player.rect.move_ip(5, 0)
+        screen.blit(currentroom.roomimage,(0,0)) #draws the current map/room
 
-     
+        for entity in sprites_alive: #this draws the sprites in the sprites_alive group (player and monsters)
+            screen.blit(entity.surf, entity.rect)
+
+###############These if statements check for collision with player and walls and if true sets the players speed to 0###############
         if (checkCollision(pygame.sprite.Sprite, player,currentroom.wallLeft1) or checkCollision(pygame.sprite.Sprite, player,currentroom.wallLeft2)):
             player.leftspeed =0
-            #player.rect.move_ip(5, 0)
         if (checkCollision(pygame.sprite.Sprite, player,currentroom.wallRight1) or checkCollision(pygame.sprite.Sprite, player,currentroom.wallRight2)):
             player.rightspeed =0
-            #player.rect.move_ip(-5, 0)
         if (checkCollision(pygame.sprite.Sprite, player,currentroom.wallTop1) or checkCollision(pygame.sprite.Sprite, player,currentroom.wallTop2)):
             player.upspeed = 0
-            #player.rect.move_ip(0, 5)
         if (checkCollision(pygame.sprite.Sprite, player,currentroom.wallBottom1) or checkCollision(pygame.sprite.Sprite, player,currentroom.wallBottom2)):
             player.downspeed = 0
-            #player.rect.move_ip(0, -5)
-        if (checkCollision(pygame.sprite.Sprite, player, currentroom.wallMiddle)):
-            if (player.direction == 1): 
+        if (checkCollision(pygame.sprite.Sprite, player, currentroom.wallMiddle) or checkCollision(pygame.sprite.Sprite, player, currentroom.wallMiddle2) or checkCollision(pygame.sprite.Sprite, player, currentroom.wallMiddle3)):
+            if (player.direction == 1):
                 player.upspeed =0
                 player.rect.move_ip(0, 1)
-            if (player.direction==2): 
+            if (player.direction==2):
                 player.rightspeed = 0
                 player.rect.move_ip(-1, 0)
-            if (player.direction==3): 
+            if (player.direction==3):
                 player.downspeed = 0
                 player.rect.move_ip(0, -1)
             if (player.direction ==4):
                 player.leftspeed =0
                 player.rect.move_ip(1, 0)
-            
-            
-        player.update(pressed_keys)
-        #print(player.rect.x)
-        #screen.fill((0,0,0)) dont use anymore
-        screen.blit(firstroom.roomimage,(0,0))
+###############These check for collision with the doors and loads new rooms and moves player#####################
+        if (checkCollision(pygame.sprite.Sprite, player, currentroom.topDoor)):
+            if (currentroom == firstroom):
+                changeRooms(secondroom)
+            elif (currentroom == thirdroom):
+                changeRooms(fourthroom)
+            elif (currentroom == fourthroom):
+                changeRooms(bossroom)
+            player.rect.move_ip(0,500)
+        if (checkCollision(pygame.sprite.Sprite, player, currentroom.bottomDoor)):
+            if (currentroom == secondroom):
+                changeRooms(firstroom)
+            elif (currentroom == fourthroom):
+                changeRooms(thirdroom)
+            elif (currentroom == bossroom):
+                changeRooms(fourthroom)
+            player.rect.move_ip(0,-500)
+        if (checkCollision(pygame.sprite.Sprite, player, currentroom.rightDoor)):
+            if (currentroom == firstroom):
+                changeRooms(thirdroom)
+            elif (currentroom == secondroom):
+                changeRooms(fourthroom)
+            player.rect.move_ip(-1030,0)
+        if (checkCollision(pygame.sprite.Sprite, player, currentroom.leftDoor)):
+            if (currentroom == thirdroom):
+                changeRooms(firstroom)
+            elif (currentroom == fourthroom):
+                changeRooms(secondroom)
+            player.rect.move_ip(1020,0)
 
-        for entity in sprites_alive:
-            screen.blit(entity.surf, entity.rect)
+        player.update(pressed_keys) ###this calls the update method in player which checks for keypresses and handles movement/attacks
 
         #use the following for collision detection between player and enemies
         #if pygame.sprite.spritecollideany(player, enemies):
-            #player.kill()
+            #player takes damage and is pushed back?
+
 
 
         pygame.display.flip()
