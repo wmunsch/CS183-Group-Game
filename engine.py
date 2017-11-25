@@ -4,6 +4,10 @@ import pygame
 pygame.init()
 screen = pygame.display.set_mode((1280, 720))
 blackFadeScreen = pygame.Surface((1280,720))
+#ui = pygame.Surface(())
+ui = pygame.image.load('graphics/charUI.png')
+ui = ui.convert_alpha()
+ui = pygame.transform.scale(ui,(275,90))
 #blackFadeScreen.fill((255,255,255))
 #blackFadeScreen.setAlpha()
 done = False
@@ -36,12 +40,26 @@ class Player(pygame.sprite.Sprite):
             pygame.transform.scale(pygame.image.load('graphics/player_walking_downF3.png'),(92,124)),
             pygame.transform.scale(pygame.image.load('graphics/player_walking_downF4.png'),(92,124))]
 
+######## this converts all the colors or something which increases performance############
+        for i in range(0,4):
+            self.walk_up_ani[i] = self.walk_up_ani[i].convert_alpha()
+            self.walk_left_ani[i] = self.walk_left_ani[i].convert_alpha()
+            self.walk_right_ani[i] = self.walk_right_ani[i].convert_alpha()
+            self.walk_down_ani[i] = self.walk_down_ani[i].convert_alpha()
+
         #self.noi = 4
         self.current_frame = 0
         self.time = 0
+        self.isCasting = False
+        self.manaTime = 0
 
 
     def update(self, pressed_keys):
+###########auto mana regen over time####################
+        self.manaTime += 1
+        if (self.manaTime % 60 == 0 and self.mana < 34):
+            self.mana += self.mana_regen
+
 ######### walking up animation ##############
         if pressed_keys[pygame.K_UP]:
             self.leftspeed = 4
@@ -106,6 +124,19 @@ class Player(pygame.sprite.Sprite):
 
             self.surf = self.walk_right_ani[self.current_frame]
 
+        elif pressed_keys[pygame.K_2]:
+            if (self.mana >= 5 and self.isCasting==False):
+                #cast spell here
+                self.isCasting = True
+                self.mana = self.mana - 5
+
+#########this makes it so you only cast once per keypress##########
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_2:
+                self.isCasting = False
+
+
+
 
     speed = 4
     leftspeed = 4
@@ -114,7 +145,9 @@ class Player(pygame.sprite.Sprite):
     upspeed =4
     x = 640
     y = 350
-    health = 10
+    health = 34#34 is max health, or 170pixels/5
+    mana = 20
+    mana_regen = 1
     direction = 1
 
 
@@ -295,6 +328,9 @@ while not done:
         pressed_keys = pygame.key.get_pressed()
 
         screen.blit(currentroom.roomimage,(0,0)) #draws the current map/room
+        pygame.draw.rect(screen,(255,0,0), (102,25,player.health*5,30),0) #draws the health bar
+        pygame.draw.rect(screen,(0,0,255), (102,68,player.mana*5,30),0) #draws the mana bar
+        screen.blit (ui,(10,10))#draws the ui to the screen
 
         for entity in sprites_alive: #this draws the sprites in the sprites_alive group (player and monsters)
             screen.blit(entity.surf, entity.rect)
@@ -357,6 +393,8 @@ while not done:
         #if pygame.sprite.spritecollideany(player, enemies):
             #player takes damage and is pushed back?
 
+        ##(102, 25) for health bar
+        ##(102, 68) for mana bar
 
 
         pygame.display.flip()
