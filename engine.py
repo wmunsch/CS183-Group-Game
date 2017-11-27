@@ -15,6 +15,9 @@ framerate = pygame.time.Clock()
 
 
 class Player(pygame.sprite.Sprite):
+ 
+    hasKey= False
+
     def __init__(self):
         super(Player, self).__init__()
         self.surf = pygame.image.load('graphics/character.png')
@@ -155,9 +158,25 @@ class Player(pygame.sprite.Sprite):
 
 
 class Goblin:
-    x = 0
-    y = 0
-    health = 3
+    def __init__(self,x,y):
+        self.x=x
+        self.y=y
+        self.path=[(144,114),(280,114),(280,300),(100,302)]
+    def update(self):
+        speed=2
+        if self.x<(self.path[0])[0]:
+            self.x+=speed
+        if self.x>(self.path[0])[0]:
+            self.x-=speed
+        if self.y<(self.path[0])[1]:
+            self.y+=speed
+        if self.y>(self.path[0])[1]:
+            self.y-=speed
+        z=(self.x-(self.path[0])[0],self.y-(self.path[0])[1])
+        if (z[0]/-speed,z[1]/-speed)==(0,0):
+            self.path=self.path[1:]
+        pygame.draw.circle(screen,((255,0,0)),(self.x,self.y),3,0)
+
 
 
 class Wall(pygame.sprite.Sprite):
@@ -165,7 +184,7 @@ class Wall(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.rect = pygame.Rect(x,y,width,height)
 
-class room1:
+class Room1:
     roomimage = pygame.image.load('graphics/room2.png')
     roomimage = roomimage.convert()
     roomimage = pygame.transform.scale(roomimage,(1280,720))
@@ -187,8 +206,8 @@ class room1:
 
 
 class Room2:
-    def __init__(self,imagepath):
-        self.roomimage = pygame.image.load(imagepath)
+    def __init__(self):
+        self.roomimage = pygame.image.load('graphics/room4.png')
         self.roomimage = self.roomimage.convert()
         self.roomimage = pygame.transform.scale(self.roomimage,(1280,720))
     wallLeft1 = Wall(0,0,100,720)
@@ -208,8 +227,8 @@ class Room2:
     leftDoor = Wall(0,0,0,0)
 
 class Room3:
-    def __init__(self,imagepath):
-        self.roomimage = pygame.image.load(imagepath)
+    def __init__(self):
+        self.roomimage = pygame.image.load('graphics/room5.png')
         self.roomimage = self.roomimage.convert()
         self.roomimage = pygame.transform.scale(self.roomimage,(1280,720))
     wallLeft1 = Wall(0,0,100,240)
@@ -230,8 +249,8 @@ class Room3:
 
 
 class Room4:
-    def __init__(self,imagepath):
-        self.roomimage = pygame.image.load(imagepath)
+    def __init__(self):
+        self.roomimage = pygame.image.load('graphics/room6.png')
         self.roomimage = self.roomimage.convert()
         self.roomimage = pygame.transform.scale(self.roomimage,(1280,720))
     wallLeft1 = Wall(0,0,100,240)
@@ -249,10 +268,11 @@ class Room4:
     bottomDoor = Wall(570,620,150,40)
     rightDoor = Wall(0,0,0,0)
     leftDoor = Wall(0,240,70,180)
+    
 
 class Bossroom:
-    def __init__(self,imagepath):
-        self.roomimage = pygame.image.load(imagepath)
+    def __init__(self):
+        self.roomimage = pygame.image.load('graphics/bossroom3.png')
         self.roomimage = self.roomimage.convert()
         self.roomimage = pygame.transform.scale(self.roomimage,(1280,720))
     wallLeft1 = Wall(0,0,100,720)
@@ -270,7 +290,7 @@ class Bossroom:
     bottomDoor = Wall(570,620,150,40)
     rightDoor = Wall(0,0,0,0)
     leftDoor = Wall(0,0,0,0)
-
+    
 
 #use this to update the current room when changing rooms
 #def updateCurrentRoom(room):
@@ -299,11 +319,11 @@ def checkCollision(self, sprite1, sprite2):
 
 
 player = Player()
-firstroom = room1()
-secondroom = Room2('graphics/room4.png')
-thirdroom = Room3('graphics/room5.png')
-fourthroom = Room4('graphics/room6.png')
-bossroom = Bossroom('graphics/bossroom3.png')
+firstroom = Room1()
+secondroom = Room2()
+thirdroom = Room3()
+fourthroom = Room4()
+bossroom = Bossroom()
 currentroom = firstroom
 sprites_alive = pygame.sprite.Group()
 sprites_walls = pygame.sprite.Group()
@@ -324,7 +344,10 @@ while not done:
                 if event.type == pygame.QUIT:
                         done = True
 
-
+                enemies=[Goblin(-5,114)]
+                for e in enemies:
+                    e.update()
+    
         pressed_keys = pygame.key.get_pressed()
 
         screen.blit(currentroom.roomimage,(0,0)) #draws the current map/room
@@ -361,11 +384,15 @@ while not done:
         if (checkCollision(pygame.sprite.Sprite, player, currentroom.topDoor)):
             if (currentroom == firstroom):
                 changeRooms(secondroom)
+                player.rect.move_ip(0,500)
             elif (currentroom == thirdroom):
                 changeRooms(fourthroom)
-            elif (currentroom == fourthroom):
+                player.rect.move_ip(0,500)
+            elif (currentroom == fourthroom and player.hasKey == True):
                 changeRooms(bossroom)
-            player.rect.move_ip(0,500)
+                player.rect.move_ip(0,500)
+            elif (currentroom == fourthroom and player.hasKey == False):
+                player.upspeed = 0
         if (checkCollision(pygame.sprite.Sprite, player, currentroom.bottomDoor)):
             if (currentroom == secondroom):
                 changeRooms(firstroom)
