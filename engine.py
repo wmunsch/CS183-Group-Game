@@ -158,25 +158,9 @@ class Player(pygame.sprite.Sprite):
 
 
 class Goblin:
-    def __init__(self,x,y):
-        self.x=x
-        self.y=y
-        self.path=[(144,114),(280,114),(280,300),(100,302)]
-    def update(self):
-        speed=2
-        if self.x<(self.path[0])[0]:
-            self.x+=speed
-        if self.x>(self.path[0])[0]:
-            self.x-=speed
-        if self.y<(self.path[0])[1]:
-            self.y+=speed
-        if self.y>(self.path[0])[1]:
-            self.y-=speed
-        z=(self.x-(self.path[0])[0],self.y-(self.path[0])[1])
-        if (z[0]/-speed,z[1]/-speed)==(0,0):
-            self.path=self.path[1:]
-        pygame.draw.circle(screen,((255,0,0)),(self.x,self.y),3,0)
-
+     x = 0
+     y = 0
+     health = 3
 
 
 class Wall(pygame.sprite.Sprite):
