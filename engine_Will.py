@@ -184,6 +184,7 @@ class room1:
     wallMiddle = Wall(300,0,180,330)
     wallMiddle2 = Wall(0,0,0,0)
     wallMiddle3 = Wall(0,0,0,0)
+    wallMiddle4 = Wall(0,0,0,0)
     topDoor = Wall(570,0,150,10)
     bottomDoor = Wall(0,0,0,0)
     rightDoor = Wall(1200,240,100,180)
@@ -206,6 +207,7 @@ class Room2:
     wallMiddle = Wall(310,300,160,130)
     wallMiddle2 = Wall(790,300,160,130)
     wallMiddle3 = Wall(0,0,0,0)
+    wallMiddle4 = Wall(0,0,0,0)
     topDoor = Wall(0,0,0,0)
     bottomDoor = Wall(570,620,150,40)
     rightDoor = Wall(1180,240,100,180)
@@ -225,8 +227,9 @@ class Room3:
     wallBottom1 = Wall(0,600,1280,60)
     wallBottom2 = Wall(0,0,0,0)
     wallMiddle = Wall(100,50,350,150)
-    wallMiddle2 = Wall(0,0,0,0)
-    wallMiddle3 = Wall(0,0,0,0)
+    wallMiddle2 = Wall(100,430,350,300)
+    wallMiddle3 = Wall(820,50,200,350)
+    wallMiddle4 = Wall(900,50,500,160)
     topDoor = Wall(570,0,150,10)
     bottomDoor = Wall(0,0,0,0)
     rightDoor = Wall(0,0,0,0)
@@ -249,6 +252,7 @@ class Room4:
     wallMiddle = Wall(500,50,70,70)
     wallMiddle2 = Wall(700,50,65,75)
     wallMiddle3 = Wall(990,400,60,30)
+    wallMiddle4 = Wall(0,0,0,0)
     topDoor = Wall(570,0,150,10)
     bottomDoor = Wall(570,620,150,40)
     rightDoor = Wall(0,0,0,0)
@@ -270,6 +274,7 @@ class Bossroom:
     wallMiddle = Wall(0,200,460,110)
     wallMiddle2 = Wall(800,200,500,110)
     wallMiddle3 = Wall(460,100,400,110)
+    wallMiddle4 = Wall(0,0,0,0)
     topDoor = Wall(0,0,0,0)
     bottomDoor = Wall(570,620,150,40)
     rightDoor = Wall(0,0,0,0)
@@ -305,7 +310,7 @@ def checkCollision(self, sprite1, sprite2):
 player = Player()
 firstroom = room1()
 secondroom = Room2('graphics/room4.png')
-thirdroom = Room3('graphics/room5.png')
+thirdroom = Room3('graphics/room5b.png')
 fourthroom = Room4('graphics/room6.png')
 bossroom = Bossroom('graphics/bossroom3.png')
 currentroom = firstroom
@@ -349,7 +354,8 @@ while not done:
             player.upspeed = 0
         if (checkCollision(pygame.sprite.Sprite, player,currentroom.wallBottom1) or checkCollision(pygame.sprite.Sprite, player,currentroom.wallBottom2)):
             player.downspeed = 0
-        if (checkCollision(pygame.sprite.Sprite, player, currentroom.wallMiddle) or checkCollision(pygame.sprite.Sprite, player, currentroom.wallMiddle2) or checkCollision(pygame.sprite.Sprite, player, currentroom.wallMiddle3)):
+        if (checkCollision(pygame.sprite.Sprite, player, currentroom.wallMiddle) or checkCollision(pygame.sprite.Sprite, player, currentroom.wallMiddle2) or checkCollision(pygame.sprite.Sprite, player, currentroom.wallMiddle3) or
+        checkCollision(pygame.sprite.Sprite, player, currentroom.wallMiddle4)):
             if (player.direction == 1):
                 player.upspeed =0
                 player.rect.move_ip(0, 1)
@@ -367,6 +373,32 @@ while not done:
                 player.rect.move_ip(0,-2)
                 player.falling = True
                 player.fallingTime +=1
+                if (player.fallingTime % 30 == 0):
+                    #player.surf = pygame.transform.scale(player.surf,(63,93))
+                    #thirdroom.leftDoor.rect.x
+                    xdistance = thirdroom.leftDoor.rect.x - player.rect.x + 100
+                    ydistance = thirdroom.leftDoor.rect.y - player.rect.y + 30
+                    player.rect.move_ip(xdistance, ydistance)
+                    player.surf = player.walk_right_ani[0]
+                    player.upspeed = 4
+            if (currentroom == thirdroom and player.direction == 4):
+                player.upspeed = 0
+                player.rect.move_ip(-2,0)
+                player.falling = True
+                player.fallingTime +=1
+                if (player.fallingTime % 30 == 0):
+                    #player.surf = pygame.transform.scale(player.surf,(63,93))
+                    #thirdroom.leftDoor.rect.x
+                    xdistance = thirdroom.leftDoor.rect.x - player.rect.x + 100
+                    ydistance = thirdroom.leftDoor.rect.y - player.rect.y + 30
+                    player.rect.move_ip(xdistance, ydistance)
+                    player.surf = player.walk_right_ani[0]
+                    player.leftspeed = 4
+            if (currentroom == thirdroom and player.direction == 2):
+                player.upspeed = 0
+                player.rect.move_ip(2,0)
+                player.falling = True
+                player.fallingTime +=1
                 if (player.fallingTime % 8 == 0):
                     #player.surf = pygame.transform.scale(player.surf,(63,93))
                     #thirdroom.leftDoor.rect.x
@@ -374,10 +406,20 @@ while not done:
                     ydistance = thirdroom.leftDoor.rect.y - player.rect.y + 30
                     player.rect.move_ip(xdistance, ydistance)
                     player.surf = player.walk_right_ani[0]
-            if (currentroom == thirdroom and player.direction == 4):
+                    player.rightspeed = 4
+            if (currentroom == thirdroom and player.direction == 3):
                 player.upspeed = 0
-                player.rect.move_ip(-2,0)
-                
+                player.rect.move_ip(0,2)
+                player.falling = True
+                player.fallingTime +=1
+                if (player.fallingTime % 8 == 0):
+                    #player.surf = pygame.transform.scale(player.surf,(63,93))
+                    #thirdroom.leftDoor.rect.x
+                    xdistance = thirdroom.leftDoor.rect.x - player.rect.x + 100
+                    ydistance = thirdroom.leftDoor.rect.y - player.rect.y + 30
+                    player.rect.move_ip(xdistance, ydistance)
+                    player.surf = player.walk_right_ani[0]
+                    player.downspeed = 4
             
 ###############These check for collision with the doors and loads new rooms and moves player#####################
         if (checkCollision(pygame.sprite.Sprite, player, currentroom.topDoor)):
