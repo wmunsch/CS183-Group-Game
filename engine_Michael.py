@@ -158,12 +158,75 @@ class Player(pygame.sprite.Sprite):
 
 
 
-class Goblin:
-    x = 0
-    y = 0
-    health = 0
+class Slime(pygame.sprite.Sprite):
+    seenPlayer = False
+    direction = 1
+    def __init__(self):
+        self.surf = pygame.image.load('graphics/slime1.png')
+        self.surf = pygame.transform.scale(self.surf,(84,88))
+        self.rect = self.surf.get_rect()
+        self.rect.move_ip(800,400)
+        self.animation_speed = 10
+        #self.walk_up_ani = [pygame.transform.scale(pygame.image.load('slime1.png'),(92,124)),
+         #   pygame.transform.scale(pygame.image.load('graphics/slime1.png'),(92,124)),
+          #  pygame.transform.scale(pygame.image.load('graphics/slime1.png'),(92,124)),
+           # pygame.transform.scale(pygame.image.load('graphics/slime1.png'),(92,124))]
+        self.walk_left_ani = [pygame.transform.scale(pygame.image.load('graphics/slimeleftF1.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/slimeleftF2.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/slimeleftF3.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/slimeleftF4.png'),(92,124))]
+        self.walk_right_ani = [pygame.transform.scale(pygame.image.load('graphics/slimerightF1.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/slimerightF2.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/slimerightF3.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/slimerightF4.png'),(92,124))]
+        #self.walk_down_ani = [pygame.transform.scale(pygame.image.load('graphics/slime1.png'),(92,124)),
+         #   pygame.transform.scale(pygame.image.load('graphics/slime1.png'),(92,124)),
+          #  pygame.transform.scale(pygame.image.load('graphics/slime1.png'),(92,124)),
+           # pygame.transform.scale(pygame.image.load('graphics/slime1.png'),(92,124))]
+        for i in range(0,4):
+            #self.walk_up_ani[i] = self.walk_up_ani[i].convert_alpha()
+            self.walk_left_ani[i] = self.walk_left_ani[i].convert_alpha()
+            self.walk_right_ani[i] = self.walk_right_ani[i].convert_alpha()
+            #self.walk_down_ani[i] = self.walk_down_ani[i].convert_alpha()
 
-
+        
+        self.current_frame = 0
+        self.time = 0
+    
+    def moveLeft(self):
+        self.leftspeed = 2
+        self.rect.move_ip(-self.leftspeed, 0)
+        self.time += 1
+        if (self.time % 12 == 0):
+                if(self.current_frame>2):
+                    self.current_frame = 0
+                else:
+                    self.current_frame+=1
+        self.surf = self.walk_left_ani[self.current_frame]
+    
+    def moveRight(self):
+        self.rightspeed = 2
+        self.rect.move_ip(self.rightspeed, 0)
+        self.time += 1
+        if (self.time % 12 == 0):
+                if(self.current_frame>2):
+                    self.current_frame = 0
+                else:
+                    self.current_frame+=1
+        self.surf = self.walk_right_ani[self.current_frame]
+        
+    def update(self):
+        if self.direction == 0:
+            if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallRight1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallRight2)):
+                self.direction = 1
+            else:
+                self.moveRight()
+        if self.direction == 1:
+            if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallLeft1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallLeft2)):
+                self.direction = 0
+            else:
+                self.moveLeft()
+                
 class Wall(pygame.sprite.Sprite):
     def __init__(self,x,y,width,height):
         pygame.sprite.Sprite.__init__(self)
@@ -320,12 +383,16 @@ fourthroom = Room4()
 bossroom = Bossroom()
 currentroom = firstroom
 bosskey = Key()
+slime = Slime()
 sprites_alive = pygame.sprite.Group()
 sprites_walls = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 
+
+
 ## add monster sprites to this group to draw them to the screen
 sprites_alive.add(player)
+#sprites_alive.add(slime)                                  #Causes error, not sure why -------------------------------------------------
 
 
 
@@ -348,7 +415,9 @@ while not done:
 
         for entity in sprites_alive: #this draws the sprites in the sprites_alive group (player and monsters)
             screen.blit(entity.surf, entity.rect)
-
+        if currentroom == firstroom:
+            screen.blit(slime.surf,slime.rect)
+            
         if currentroom == fourthroom and player.hasKey == False:
             screen.blit(bosskey.surf,bosskey.rect)
             
@@ -415,7 +484,7 @@ while not done:
             player.rect.move_ip(1020,0)
 
         player.update(pressed_keys) ###this calls the update method in player which checks for keypresses and handles movement/attacks
-
+        slime.update()
         #use the following for collision detection between player and enemies
         #if pygame.sprite.spritecollideany(player, enemies):
             #player takes damage and is pushed back?
