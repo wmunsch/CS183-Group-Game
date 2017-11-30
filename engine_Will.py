@@ -1,5 +1,6 @@
 #Main engine
 import pygame
+import random
 
 pygame.init()
 screen = pygame.display.set_mode((1280, 720))
@@ -54,6 +55,7 @@ class Player(pygame.sprite.Sprite):
         self.manaTime = 0
         self.fallingTime = 0
         self.falling = False
+        self.hasKey = False
 
 
     def update(self, pressed_keys):
@@ -153,10 +155,74 @@ class Player(pygame.sprite.Sprite):
     mana = 20
     mana_regen = 1
     direction = 1
-  
 
 
 
+class Slime(pygame.sprite.Sprite):
+    seenPlayer = False
+    #direction = 1
+    def __init__(self):
+        super(Slime, self).__init__()
+        self.surf = pygame.image.load('graphics/slime1.png')
+        self.surf = pygame.transform.scale(self.surf,(84,88))
+        self.rect = self.surf.get_rect()
+        self.rect.move_ip(800,400)
+        self.animation_speed = 10
+        self.walk_left_ani = [pygame.transform.scale(pygame.image.load('graphics/slimeleftF1.png'),(68,60)),
+            pygame.transform.scale(pygame.image.load('graphics/slimeleftF2.png'),(68,60)),
+            pygame.transform.scale(pygame.image.load('graphics/slimeleftF3.png'),(68,60)),
+            pygame.transform.scale(pygame.image.load('graphics/slimeleftF4.png'),(68,60))]
+        self.walk_right_ani = [pygame.transform.scale(pygame.image.load('graphics/slimerightF1.png'),(68,60)),
+            pygame.transform.scale(pygame.image.load('graphics/slimerightF2.png'),(68,60)),
+            pygame.transform.scale(pygame.image.load('graphics/slimerightF3.png'),(68,60)),
+            pygame.transform.scale(pygame.image.load('graphics/slimerightF4.png'),(68,60))]
+        for i in range(0,2):
+            self.walk_left_ani[i] = self.walk_left_ani[i].convert_alpha()
+            self.walk_right_ani[i] = self.walk_right_ani[i].convert_alpha()
+        self.direction = 0
+        self.current_frame = 0
+        self.time = 0
+
+    def moveLeft(self):
+        self.leftspeed = 1
+        self.rect.move_ip(-self.leftspeed, 0)
+        self.time += 1
+        if (self.time % 12 == 0):
+                if(self.current_frame>2):
+                    self.current_frame = 0
+                else:
+                    self.current_frame+=1
+        self.surf = self.walk_left_ani[self.current_frame]
+
+    def moveRight(self):
+        self.rightspeed = 1
+        self.rect.move_ip(self.rightspeed, 0)
+        self.time += 1
+        if (self.time % 12 == 0):
+                if(self.current_frame>2):
+                    self.current_frame = 0
+                else:
+                    self.current_frame+=1
+        self.surf = self.walk_right_ani[self.current_frame]
+
+    def update(self):
+        if self.direction == 0:
+            if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallRight1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallRight2)):
+                self.direction = 1
+            else:
+                self.moveRight()
+        if self.direction == 1:
+            if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallLeft1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallLeft2)):
+                self.direction = 0
+            else:
+                self.moveLeft()
+
+class Key(pygame.sprite.Sprite):
+    def __init__(self):
+        self.surf = pygame.image.load('graphics/bosskey.png')
+        self.surf = pygame.transform.scale(self.surf,(28,64))
+        self.rect = self.surf.get_rect()
+        self.rect.move_ip(1100,200)
 
 class Goblin:
     x = 0
@@ -306,9 +372,10 @@ def checkCollision(self, sprite1, sprite2):
 
 
 
-
+slime1 = Slime()
 player = Player()
 firstroom = room1()
+bosskey = Key()
 secondroom = Room2('graphics/room4.png')
 thirdroom = Room3('graphics/room5b.png')
 fourthroom = Room4('graphics/room6.png')
@@ -320,6 +387,7 @@ all_sprites = pygame.sprite.Group()
 
 ## add monster sprites to this group to draw them to the screen
 sprites_alive.add(player)
+sprites_alive.add(slime1)
 
 
 
@@ -343,9 +411,17 @@ while not done:
 
         for entity in sprites_alive: #this draws the sprites in the sprites_alive group (player and monsters)
             screen.blit(entity.surf, entity.rect)
-       
-            
+
+
+        if currentroom == fourthroom and player.hasKey == False:
+            screen.blit(bosskey.surf,bosskey.rect)
+
+
 ###############These if statements check for collision with player and walls and if true sets the players speed to 0###############
+        if(currentroom == fourthroom):
+            if (checkCollision(pygame.sprite.Sprite,player, bosskey)):
+                player.hasKey = True
+
         if (checkCollision(pygame.sprite.Sprite, player,currentroom.wallLeft1) or checkCollision(pygame.sprite.Sprite, player,currentroom.wallLeft2)):
             player.leftspeed =0
         if (checkCollision(pygame.sprite.Sprite, player,currentroom.wallRight1) or checkCollision(pygame.sprite.Sprite, player,currentroom.wallRight2)):
@@ -399,7 +475,7 @@ while not done:
                 player.rect.move_ip(2,0)
                 player.falling = True
                 player.fallingTime +=1
-                if (player.fallingTime % 8 == 0):
+                if (player.fallingTime % 30 == 0):
                     #player.surf = pygame.transform.scale(player.surf,(63,93))
                     #thirdroom.leftDoor.rect.x
                     xdistance = thirdroom.leftDoor.rect.x - player.rect.x + 100
@@ -412,7 +488,7 @@ while not done:
                 player.rect.move_ip(0,2)
                 player.falling = True
                 player.fallingTime +=1
-                if (player.fallingTime % 8 == 0):
+                if (player.fallingTime % 30 == 0):
                     #player.surf = pygame.transform.scale(player.surf,(63,93))
                     #thirdroom.leftDoor.rect.x
                     xdistance = thirdroom.leftDoor.rect.x - player.rect.x + 100
@@ -420,16 +496,21 @@ while not done:
                     player.rect.move_ip(xdistance, ydistance)
                     player.surf = player.walk_right_ani[0]
                     player.downspeed = 4
-            
+
 ###############These check for collision with the doors and loads new rooms and moves player#####################
         if (checkCollision(pygame.sprite.Sprite, player, currentroom.topDoor)):
             if (currentroom == firstroom):
                 changeRooms(secondroom)
+                player.rect.move_ip(0,500)
             elif (currentroom == thirdroom):
                 changeRooms(fourthroom)
-            elif (currentroom == fourthroom):
+                player.rect.move_ip(0,500)
+
+            elif (currentroom == fourthroom and player.hasKey == True):
                 changeRooms(bossroom)
-            player.rect.move_ip(0,500)
+                player.rect.move_ip(0,500)
+            elif (currentroom == fourthroom and player.hasKey == False):
+                player.upspeed = 0
         if (checkCollision(pygame.sprite.Sprite, player, currentroom.bottomDoor)):
             if (currentroom == secondroom):
                 changeRooms(firstroom)
@@ -452,7 +533,7 @@ while not done:
             player.rect.move_ip(1020,0)
 
         player.update(pressed_keys) ###this calls the update method in player which checks for keypresses and handles movement/attacks
-
+        slime1.update()
         #use the following for collision detection between player and enemies
         #if pygame.sprite.spritecollideany(player, enemies):
             #player takes damage and is pushed back?
