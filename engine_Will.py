@@ -29,8 +29,11 @@ class Player(pygame.sprite.Sprite):
         self.animation_speed = 10
         self.animation_speed = self.animation_speed
         self.rect = self.surf.get_rect()
-        self.rect = self.rect.inflate(-5,-30)
+        #self.rect = pygame.Rect(40,20,50,100)#self.surf.get_rect()
+        #self.rect = self.rect.inflate(-5,-30)
         self.rect.move_ip(600,400) #player spawn point
+        
+        
         self.walk_up_ani = [pygame.transform.scale(pygame.image.load('graphics/player_walking_upF1.png'),(92,124)),
             pygame.transform.scale(pygame.image.load('graphics/player_walking_upF2.png'),(92,124)),
             pygame.transform.scale(pygame.image.load('graphics/player_walking_upF3.png'),(92,124)),
@@ -280,7 +283,8 @@ class Slime(pygame.sprite.Sprite):
         self.surf = self.walk_right_ani[self.current_frame]
 
     def update(self):
-        self.distance -=1
+        if (self.frozen == False):
+            self.distance -=1
         print (self.distance)
         if self.direction == 0:
             if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallRight1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallRight2)):
@@ -550,7 +554,7 @@ while not done:
                 if event.type == pygame.QUIT:
                         done = True
 
-
+        #pygame.draw.rect(screen,(255,0,0), (player.rect),0)
         pressed_keys = pygame.key.get_pressed()
 
         screen.blit(currentroom.roomimage,(0,0))
