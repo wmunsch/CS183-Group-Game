@@ -9,6 +9,12 @@ blackFadeScreen = pygame.Surface((1280,720))
 ui = pygame.image.load('graphics/charUI.png')
 ui = ui.convert_alpha()
 ui = pygame.transform.scale(ui,(275,90))
+icenovaicon = pygame.image.load('graphics/icenovaicon.png')
+icenovaicon = icenovaicon.convert()
+icenovaicon = pygame.transform.scale(icenovaicon,(80,76))
+icenovaicongrey = pygame.image.load('graphics/icenovaicongrey.png')
+icenovaicongrey = icenovaicongrey.convert()
+icenovaicongrey = pygame.transform.scale(icenovaicongrey,(80,76))
 #blackFadeScreen.fill((255,255,255))
 #blackFadeScreen.setAlpha()
 done = False
@@ -18,8 +24,8 @@ framerate = pygame.time.Clock()
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super(Player, self).__init__()
-        self.surf = pygame.image.load('graphics/character.png')
-        self.surf = pygame.transform.scale(self.surf,(76,112))
+        self.surf = pygame.image.load('graphics/player_walking_downF1.png')
+        self.surf = pygame.transform.scale(self.surf,(92,124))
         self.animation_speed = 10
         self.animation_speed = self.animation_speed
         self.rect = self.surf.get_rect()
@@ -40,6 +46,15 @@ class Player(pygame.sprite.Sprite):
             pygame.transform.scale(pygame.image.load('graphics/player_walking_downF2.png'),(92,124)),
             pygame.transform.scale(pygame.image.load('graphics/player_walking_downF3.png'),(92,124)),
             pygame.transform.scale(pygame.image.load('graphics/player_walking_downF4.png'),(92,124))]
+        self.cast_ice_ani = [pygame.transform.scale(pygame.image.load('graphics/player_cast_iceF1.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_cast_iceF2.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_cast_iceF3.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_cast_iceF4.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_cast_iceF5.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_cast_iceF6.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_cast_iceF7.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_cast_iceF8.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_cast_iceF9.png'),(92,124))]
 
 ######## this converts all the colors or something which increases performance############
         for i in range(0,4):
@@ -56,6 +71,11 @@ class Player(pygame.sprite.Sprite):
         self.fallingTime = 0
         self.falling = False
         self.hasKey = False
+        self.castingTime = 0
+        self.frameOn = 0
+        self.castingIceNova = False
+        self.icenovacooldown = 0
+        self.startCountingCooldown = False
 
 
     def update(self, pressed_keys):
@@ -65,76 +85,118 @@ class Player(pygame.sprite.Sprite):
         self.manaTime += 1
         if (self.manaTime % 60 == 0 and self.mana < 34):
             self.mana += self.mana_regen
-
+########## handles spell cooldowns #################
+        if (self.startCountingCooldown == True):
+            self.icenovacooldown +=1
+            if (self.icenovacooldown % 400 == 0):
+                self.startCountingCooldown = False
+                self.icenovacooldown = 0
+############starts the cast animation##############
+        if (self.isCasting == True):
+            self.castingTime += 1
+            if (self.castingTime % 8 == 0):
+                if (self.frameOn < 7):
+                    self.surf = self.cast_ice_ani[self.frameOn]
+                    self.frameOn +=1
+                elif (self.frameOn == 7):
+                    icenova.surf = icenova.animation[0]
+                    self.castingIceNova = True
+                    self.surf = self.cast_ice_ani[self.frameOn]
+                    self.frameOn +=1
+                elif (self.frameOn >7 and self.frameOn <9):
+                    self.surf = self.cast_ice_ani[self.frameOn]
+                    self.frameOn +=1
+                else:
+                    self.frameOn = 0
+                    self.isCasting = False
+                    self.castingTime = 0
+                    self.surf = self.walk_down_ani[0]
 ######### walking up animation ##############
         if pressed_keys[pygame.K_UP]:
-            self.leftspeed = 4
-            self.rightspeed = 4
-            self.downspeed = 4
-            self.direction = 1
-            self.rect.move_ip(0, -self.upspeed)
-            self.time += 1
-            if (self.time % 12 == 0):
-                if(self.current_frame>2):
-                    self.current_frame = 0
-                else:
-                    self.current_frame+=1
+            if (self.isCasting == False):
+                self.leftspeed = 4
+                self.rightspeed = 4
+                self.downspeed = 4
+                self.direction = 1
+                self.rect.move_ip(0, -self.upspeed)
+                self.time += 1
+                if (self.time % 12 == 0):
+                    if(self.current_frame>2):
+                        self.current_frame = 0
+                    else:
+                        self.current_frame+=1
 
-            self.surf = self.walk_up_ani[self.current_frame]
+                self.surf = self.walk_up_ani[self.current_frame]
 
 ######### walking down animation ##############
         elif pressed_keys[pygame.K_DOWN]:
-            self.leftspeed = 4
-            self.rightspeed = 4
-            self.upspeed = 4
-            self.direction = 3
-            self.rect.move_ip(0, self.downspeed)
-            self.time += 1
-            if (self.time % 12 == 0):
-                if(self.current_frame>2):
-                    self.current_frame = 0
-                else:
-                    self.current_frame+=1
+            if (self.isCasting == False):
+                self.leftspeed = 4
+                self.rightspeed = 4
+                self.upspeed = 4
+                self.direction = 3
+                self.rect.move_ip(0, self.downspeed)
+                self.time += 1
+                if (self.time % 12 == 0):
+                    if(self.current_frame>2):
+                        self.current_frame = 0
+                    else:
+                        self.current_frame+=1
 
-            self.surf = self.walk_down_ani[self.current_frame]
+                self.surf = self.walk_down_ani[self.current_frame]
 
 ######### walking left animation ##############
         elif pressed_keys[pygame.K_LEFT]:
-            self.downspeed = 4
-            self.rightspeed = 4
-            self.upspeed = 4
-            self.direction = 4
-            self.rect.move_ip(-self.leftspeed, 0)
-            self.time += 1
-            if (self.time % 12 == 0):
-                if(self.current_frame>2):
-                    self.current_frame = 0
-                else:
-                    self.current_frame+=1
+            if (self.isCasting == False):
+                self.downspeed = 4
+                self.rightspeed = 4
+                self.upspeed = 4
+                self.direction = 4
+                self.rect.move_ip(-self.leftspeed, 0)
+                self.time += 1
+                if (self.time % 12 == 0):
+                    if(self.current_frame>2):
+                        self.current_frame = 0
+                    else:
+                        self.current_frame+=1
 
-            self.surf = self.walk_left_ani[self.current_frame]
+                self.surf = self.walk_left_ani[self.current_frame]
 
 ######### walking right animation ##############
         elif pressed_keys[pygame.K_RIGHT]:
-            self.leftspeed = 4
-            self.downspeed = 4
-            self.upspeed = 4
-            self.direction = 2
-            self.rect.move_ip(self.rightspeed, 0)
-            self.time += 1
-            if (self.time % 12 == 0):
-                if(self.current_frame>2):
-                    self.current_frame = 0
-                else:
-                    self.current_frame+=1
+            if (self.isCasting == False):
+                self.leftspeed = 4
+                self.downspeed = 4
+                self.upspeed = 4
+                self.direction = 2
+                self.rect.move_ip(self.rightspeed, 0)
+                self.time += 1
+                if (self.time % 12 == 0):
+                    if(self.current_frame>2):
+                        self.current_frame = 0
+                    else:
+                        self.current_frame+=1
 
-            self.surf = self.walk_right_ani[self.current_frame]
+                self.surf = self.walk_right_ani[self.current_frame]
 
         elif pressed_keys[pygame.K_2]:
             if (self.mana >= 5 and self.isCasting==False):
                 #cast spell here
                 self.isCasting = True
                 self.mana = self.mana - 5
+
+        elif pressed_keys[pygame.K_3]:
+            if (self.isCasting == False and self.startCountingCooldown == False and self.mana >= 10):#(self.mana >= 10 and self.isCasting ==False):
+                xdistance = self.rect.x - icenova.rect.x - 150
+                ydistance = self.rect.y -icenova.rect.y - 105
+                icenova.rect.move_ip(xdistance, ydistance)
+                self.startCountingCooldown = True
+                self.mana -= 10
+                #self.castingIceNova = True
+                self.isCasting = True
+
+
+
 
 #########this makes it so you only cast once per keypress##########
         elif event.type == pygame.KEYUP:
@@ -224,11 +286,59 @@ class Key(pygame.sprite.Sprite):
         self.rect = self.surf.get_rect()
         self.rect.move_ip(1100,200)
 
-class Goblin:
-    x = 0
-    y = 0
-    health = 3
+class IceNova(pygame.sprite.Sprite):
+    def __init__(self):
+        super(IceNova, self).__init__()
+        self.surf = pygame.image.load('graphics/icenova0.png')
+        self.surf = pygame.transform.scale(self.surf,(392,392))
+        self.rect = self.surf.get_rect()
+        self.rect.move_ip(400,200) #player spawn point
+        self.animation = [pygame.transform.scale(pygame.image.load('graphics/icenova0.png'),(392,392)),
+            pygame.transform.scale(pygame.image.load('graphics/icenova1.png'),(392,392)),
+            pygame.transform.scale(pygame.image.load('graphics/icenova2.png'),(392,392)),
+            pygame.transform.scale(pygame.image.load('graphics/icenova3.png'),(392,392)),
+            pygame.transform.scale(pygame.image.load('graphics/icenova4.png'),(392,392)),
+            pygame.transform.scale(pygame.image.load('graphics/icenova5.png'),(392,392)),
+            pygame.transform.scale(pygame.image.load('graphics/icenova6.png'),(392,392)),
+            pygame.transform.scale(pygame.image.load('graphics/icenova7.png'),(392,392)),
+            pygame.transform.scale(pygame.image.load('graphics/icenova8.png'),(392,392)),
+            pygame.transform.scale(pygame.image.load('graphics/icenova6.png'),(392,392)),
+            pygame.transform.scale(pygame.image.load('graphics/icenova7.png'),(392,392)),
+            pygame.transform.scale(pygame.image.load('graphics/icenova9.png'),(392,392)),
+            pygame.transform.scale(pygame.image.load('graphics/icenova10.png'),(392,392)),
+            pygame.transform.scale(pygame.image.load('graphics/icenova11.png'),(392,392)),
+            pygame.transform.scale(pygame.image.load('graphics/icenova12.png'),(392,392))]
+            #pygame.image.load('graphics/blank.png')]
+        for i in range(0,13):
+            self.animation[i] = self.animation[i].convert_alpha()
 
+        self.frameOn = 0
+        self.castingTime = 0
+        self.counter = 0
+    def update(self):
+############starts the animation##############
+        self.castingTime += 1
+        if (self.castingTime % 7 == 0):
+            #if (self.frameOn == 0):
+            if (self.frameOn < 7):
+                self.frameOn +=1
+                self.surf = self.animation[self.frameOn]
+
+            elif(self.frameOn >6 and self.frameOn < 12):
+                self.counter +=1
+                if (self.counter % 5 == 0):
+                    self.surf = self.animation[self.frameOn]
+                    self.frameOn +=1
+
+            elif(self.frameOn >11 and self.frameOn <15):
+                self.surf = self.animation[self.frameOn]
+                self.frameOn +=1
+            else:
+                self.frameOn = 0
+                self.castingTime = 0
+                self.counter = 0
+                player.castingIceNova = False
+                #self.surf = null#self.animation[self.frameOn]
 
 class Wall(pygame.sprite.Sprite):
     def __init__(self,x,y,width,height):
@@ -239,6 +349,9 @@ class room1:
     roomimage = pygame.image.load('graphics/room2.png')
     roomimage = roomimage.convert()
     roomimage = pygame.transform.scale(roomimage,(1280,720))
+    #roomfloor = pygame.image.load('graphics/floor2b.png')
+    #roomfloor= roomfloor.convert()
+    #roomfloor = pygame.transform.scale(roomfloor,(1280,720))
     wallLeft1 = Wall(0,0,100,720)
     wallLeft2 = Wall(0,0,0,0)
     wallRight1 = Wall(1180,0,100,240)
@@ -371,7 +484,7 @@ def checkCollision(self, sprite1, sprite2):
     return(col)
 
 
-
+icenova = IceNova()
 slime1 = Slime()
 player = Player()
 firstroom = room1()
@@ -388,7 +501,7 @@ all_sprites = pygame.sprite.Group()
 ## add monster sprites to this group to draw them to the screen
 sprites_alive.add(player)
 sprites_alive.add(slime1)
-
+#sprites_alive.add(icenova)
 
 
 sprites_walls.add(firstroom.wallLeft1)
@@ -404,10 +517,17 @@ while not done:
 
         pressed_keys = pygame.key.get_pressed()
 
-        screen.blit(currentroom.roomimage,(0,0)) #draws the current map/room
-        pygame.draw.rect(screen,(255,0,0), (102,25,player.health*5,30),0) #draws the health bar
-        pygame.draw.rect(screen,(0,0,255), (102,68,player.mana*5,30),0) #draws the mana bar
-        screen.blit (ui,(10,10))#draws the ui to the screen
+        screen.blit(currentroom.roomimage,(0,0))
+
+        if (player.castingIceNova == True):
+            icenova.update()
+            screen.blit(icenova.surf,icenova.rect)
+
+####### drawing spell icons #################################
+        if (player.startCountingCooldown == False):
+            screen.blit(icenovaicon,(1000,10))
+        else :
+            screen.blit(icenovaicongrey,(1000,10))
 
         for entity in sprites_alive: #this draws the sprites in the sprites_alive group (player and monsters)
             screen.blit(entity.surf, entity.rect)
@@ -416,6 +536,11 @@ while not done:
         if currentroom == fourthroom and player.hasKey == False:
             screen.blit(bosskey.surf,bosskey.rect)
 
+
+
+        pygame.draw.rect(screen,(255,0,0), (102,25,player.health*5,30),0) #draws the health bar
+        pygame.draw.rect(screen,(0,0,255), (102,68,player.mana*5,30),0) #draws the mana bar
+        screen.blit (ui,(10,10))#draws the ui to the screen
 
 ###############These if statements check for collision with player and walls and if true sets the players speed to 0###############
         if(currentroom == fourthroom):
