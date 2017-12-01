@@ -29,11 +29,7 @@ class Player(pygame.sprite.Sprite):
         self.animation_speed = 10
         self.animation_speed = self.animation_speed
         self.rect = self.surf.get_rect()
-        #self.rect = pygame.Rect(40,20,50,100)#self.surf.get_rect()
-        #self.rect = self.rect.inflate(-5,-30)
         self.rect.move_ip(600,400) #player spawn point
-        
-        
         self.walk_up_ani = [pygame.transform.scale(pygame.image.load('graphics/player_walking_upF1.png'),(92,124)),
             pygame.transform.scale(pygame.image.load('graphics/player_walking_upF2.png'),(92,124)),
             pygame.transform.scale(pygame.image.load('graphics/player_walking_upF3.png'),(92,124)),
@@ -77,6 +73,9 @@ class Player(pygame.sprite.Sprite):
         self.hasKey = False
         self.castingTime = 0
         self.frameOn = 0
+        self.castingFire = False
+        self.castingFireball = False
+        self.castingIce = False
         self.castingIceNova = False
         self.icenovacooldown = 0
         self.startCountingCooldown = False
@@ -95,8 +94,8 @@ class Player(pygame.sprite.Sprite):
             if (self.icenovacooldown % 400 == 0):
                 self.startCountingCooldown = False
                 self.icenovacooldown = 0
-############starts the cast animation##############
-        if (self.isCasting == True):
+############starts the cast animation for icenova##############
+        if (self.isCasting == True and self.castingIce == True):
             self.castingTime += 1
             if (self.castingTime % 8 == 0):
                 if (self.frameOn < 7):
@@ -115,6 +114,9 @@ class Player(pygame.sprite.Sprite):
                     self.isCasting = False
                     self.castingTime = 0
                     self.surf = self.walk_down_ani[0]
+        elif (self.isCasting == True and self.castingFire == True):
+            sprites_alive.add(Fireball())
+            ##self.castingFire = False
 ######### walking up animation ##############
         if pressed_keys[pygame.K_UP]:
             if (self.isCasting == False):
@@ -185,9 +187,13 @@ class Player(pygame.sprite.Sprite):
 
         elif pressed_keys[pygame.K_2]:
             if (self.mana >= 5 and self.isCasting==False):
-                #cast spell here
+                xdistance = self.rect.x - fireball.rect.x - 150
+                ydistance = self.rect.y - fireball.rect.y - 105
+                fireball.rect.move_ip(xdistance, ydistance)
                 self.isCasting = True
-                self.mana = self.mana - 5
+                self.castingFire = True
+                self.castingIce = False
+                self.mana = self.mana - 2
 
         elif pressed_keys[pygame.K_3]:
             if (self.isCasting == False and self.startCountingCooldown == False and self.mana >= 10):#(self.mana >= 10 and self.isCasting ==False):
@@ -196,11 +202,17 @@ class Player(pygame.sprite.Sprite):
                 icenova.rect.move_ip(xdistance, ydistance)
                 self.startCountingCooldown = True
                 self.mana -= 10
-                #self.castingIceNova = True
+                self.castingIce = True
+                self.castingFire = False
                 self.isCasting = True
 
 
-
+#########this makes it so you only cast once per keypress##########
+    while True:
+        #get all events from the  event queue
+        for ev in pygame.event.get():
+            if ev.type == pygame.KEYDOWN:
+                if ev.key == pygame.K_2:
 
 #########this makes it so you only cast once per keypress##########
         elif event.type == pygame.KEYUP:
@@ -222,7 +234,14 @@ class Player(pygame.sprite.Sprite):
     mana_regen = 1
     direction = 1
 
-
+class Fireball(pygame.sprite.Sprite):
+     def __init__(self):
+        super(Fireball, self).__init__()
+        self.surf = pygame.image.load('graphics/orc1.png')
+        self.surf = pygame.transform.scale(self.surf,(50,70))
+        self.rect = self.surf.get_rect()
+        self.rect.move_ip(400,200)
+    
 
 class Slime(pygame.sprite.Sprite):
     seenPlayer = False
@@ -242,26 +261,15 @@ class Slime(pygame.sprite.Sprite):
             pygame.transform.scale(pygame.image.load('graphics/slimerightF2.png'),(68,60)),
             pygame.transform.scale(pygame.image.load('graphics/slimerightF3.png'),(68,60)),
             pygame.transform.scale(pygame.image.load('graphics/slimerightF4.png'),(68,60))]
-        self.frozen_right = pygame.transform.scale(pygame.image.load('graphics/slimefrozenright.png'),(68,60))
-        self.frozen_left = pygame.transform.scale(pygame.image.load('graphics/slimefrozenleft.png'),(68,60))
-        for i in range(0,4):
+        for i in range(0,2):
             self.walk_left_ani[i] = self.walk_left_ani[i].convert_alpha()
             self.walk_right_ani[i] = self.walk_right_ani[i].convert_alpha()
-        self.frozen_right = self.frozen_right.convert_alpha()
-        self.frozen_left = self.frozen_left.convert_alpha()
-        
         self.direction = 0
         self.current_frame = 0
         self.time = 0
-        self.frozen = False
-        self.speed = 2
-        self.frozenCounter = 0
-        self.distance = 50
-        self.newInstruction = False
-    
 
     def moveLeft(self):
-        self.leftspeed = self.speed
+        self.leftspeed = 1
         self.rect.move_ip(-self.leftspeed, 0)
         self.time += 1
         if (self.time % 12 == 0):
@@ -272,7 +280,7 @@ class Slime(pygame.sprite.Sprite):
         self.surf = self.walk_left_ani[self.current_frame]
 
     def moveRight(self):
-        self.rightspeed = self.speed
+        self.rightspeed = 1
         self.rect.move_ip(self.rightspeed, 0)
         self.time += 1
         if (self.time % 12 == 0):
@@ -283,9 +291,6 @@ class Slime(pygame.sprite.Sprite):
         self.surf = self.walk_right_ani[self.current_frame]
 
     def update(self):
-        if (self.frozen == False):
-            self.distance -=1
-        print (self.distance)
         if self.direction == 0:
             if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallRight1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallRight2)):
                 self.direction = 1
@@ -296,24 +301,6 @@ class Slime(pygame.sprite.Sprite):
                 self.direction = 0
             else:
                 self.moveLeft()
-        if self.distance == 0:
-            self.newInstruction = True
-        
-        if self.frozen == True:
-            if (self.direction == 0):
-                self.surf = self.frozen_right
-            else: 
-                self.surf = self.frozen_left
-            self.frozenCounter +=1
-            if (self.frozenCounter == 10):
-                self.frozen = False
-                self.frozenCounter = 0
-                self.speed = 1
-        if (self.newInstruction ==True):
-            self.distance = random.randint(100,200)
-            self.direction = random.randint(0,1)
-            self.newInstruction = False
-                
 
 class Key(pygame.sprite.Sprite):
     def __init__(self):
@@ -351,19 +338,16 @@ class IceNova(pygame.sprite.Sprite):
         self.frameOn = 0
         self.castingTime = 0
         self.counter = 0
-        self.canFreeze = False
     def update(self):
 ############starts the animation##############
         self.castingTime += 1
         if (self.castingTime % 7 == 0):
-            self.canFreeze = True
             #if (self.frameOn == 0):
             if (self.frameOn < 7):
                 self.frameOn +=1
                 self.surf = self.animation[self.frameOn]
 
             elif(self.frameOn >6 and self.frameOn < 12):
-                
                 self.counter +=1
                 if (self.counter % 5 == 0):
                     self.surf = self.animation[self.frameOn]
@@ -377,7 +361,6 @@ class IceNova(pygame.sprite.Sprite):
                 self.castingTime = 0
                 self.counter = 0
                 player.castingIceNova = False
-                self.canFreeze = False
                 #self.surf = null#self.animation[self.frameOn]
 
 class Wall(pygame.sprite.Sprite):
@@ -523,7 +506,7 @@ def checkCollision(self, sprite1, sprite2):
     col = pygame.sprite.collide_rect(sprite1, sprite2)
     return(col)
 
-
+fireball = Fireball()
 icenova = IceNova()
 slime1 = Slime()
 player = Player()
@@ -554,7 +537,7 @@ while not done:
                 if event.type == pygame.QUIT:
                         done = True
 
-        #pygame.draw.rect(screen,(255,0,0), (player.rect),0)
+
         pressed_keys = pygame.key.get_pressed()
 
         screen.blit(currentroom.roomimage,(0,0))
@@ -562,6 +545,10 @@ while not done:
         if (player.castingIceNova == True):
             icenova.update()
             screen.blit(icenova.surf,icenova.rect)
+            
+        if (player.castingFireball == True):
+            fireball.update()
+            screen.blit(fireball.surf,fireball.rect)
 
 ####### drawing spell icons #################################
         if (player.startCountingCooldown == False):
@@ -697,29 +684,6 @@ while not done:
                 changeRooms(secondroom)
             player.rect.move_ip(1020,0)
 
-            
-################Spell collision with slime ###########################
-        if (checkCollision(pygame.sprite.Sprite, icenova, slime1)):
-            if (icenova.canFreeze == True):
-                slime1.frozen = True
-                slime1.speed = 0
-            
-############### Player Collision with slime ##########################
-        if (checkCollision(pygame.sprite.Sprite, player,slime1)):
-            if (slime1.frozen == True):
-                if (player.direction == 1):
-                    player.upspeed =0
-                    player.rect.move_ip(0, 1)
-                if (player.direction==2):
-                    player.rightspeed = 0
-                    player.rect.move_ip(-1, 0)
-                if (player.direction==3):
-                    player.downspeed = 0
-                    player.rect.move_ip(0, -1)
-                if (player.direction ==4):
-                    player.leftspeed =0
-                    player.rect.move_ip(1, 0)
-            
         player.update(pressed_keys) ###this calls the update method in player which checks for keypresses and handles movement/attacks
         slime1.update()
         #use the following for collision detection between player and enemies
