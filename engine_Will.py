@@ -29,6 +29,7 @@ class Player(pygame.sprite.Sprite):
         self.animation_speed = 10
         self.animation_speed = self.animation_speed
         self.rect = self.surf.get_rect()
+        self.rect = self.rect.inflate(-5,-30)
         self.rect.move_ip(600,400) #player spawn point
         self.walk_up_ani = [pygame.transform.scale(pygame.image.load('graphics/player_walking_upF1.png'),(92,124)),
             pygame.transform.scale(pygame.image.load('graphics/player_walking_upF2.png'),(92,124)),
@@ -238,15 +239,26 @@ class Slime(pygame.sprite.Sprite):
             pygame.transform.scale(pygame.image.load('graphics/slimerightF2.png'),(68,60)),
             pygame.transform.scale(pygame.image.load('graphics/slimerightF3.png'),(68,60)),
             pygame.transform.scale(pygame.image.load('graphics/slimerightF4.png'),(68,60))]
-        for i in range(0,2):
+        self.frozen_right = pygame.transform.scale(pygame.image.load('graphics/slimefrozenright.png'),(68,60))
+        self.frozen_left = pygame.transform.scale(pygame.image.load('graphics/slimefrozenleft.png'),(68,60))
+        for i in range(0,4):
             self.walk_left_ani[i] = self.walk_left_ani[i].convert_alpha()
             self.walk_right_ani[i] = self.walk_right_ani[i].convert_alpha()
+        self.frozen_right = self.frozen_right.convert_alpha()
+        self.frozen_left = self.frozen_left.convert_alpha()
+        
         self.direction = 0
         self.current_frame = 0
         self.time = 0
+        self.frozen = False
+        self.speed = 2
+        self.frozenCounter = 0
+        self.distance = 50
+        self.newInstruction = False
+    
 
     def moveLeft(self):
-        self.leftspeed = 1
+        self.leftspeed = self.speed
         self.rect.move_ip(-self.leftspeed, 0)
         self.time += 1
         if (self.time % 12 == 0):
@@ -257,7 +269,7 @@ class Slime(pygame.sprite.Sprite):
         self.surf = self.walk_left_ani[self.current_frame]
 
     def moveRight(self):
-        self.rightspeed = 1
+        self.rightspeed = self.speed
         self.rect.move_ip(self.rightspeed, 0)
         self.time += 1
         if (self.time % 12 == 0):
@@ -268,6 +280,8 @@ class Slime(pygame.sprite.Sprite):
         self.surf = self.walk_right_ani[self.current_frame]
 
     def update(self):
+        self.distance -=1
+        print (self.distance)
         if self.direction == 0:
             if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallRight1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallRight2)):
                 self.direction = 1
@@ -278,6 +292,24 @@ class Slime(pygame.sprite.Sprite):
                 self.direction = 0
             else:
                 self.moveLeft()
+        if self.distance == 0:
+            self.newInstruction = True
+        
+        if self.frozen == True:
+            if (self.direction == 0):
+                self.surf = self.frozen_right
+            else: 
+                self.surf = self.frozen_left
+            self.frozenCounter +=1
+            if (self.frozenCounter == 10):
+                self.frozen = False
+                self.frozenCounter = 0
+                self.speed = 1
+        if (self.newInstruction ==True):
+            self.distance = random.randint(100,200)
+            self.direction = random.randint(0,1)
+            self.newInstruction = False
+                
 
 class Key(pygame.sprite.Sprite):
     def __init__(self):
@@ -315,16 +347,19 @@ class IceNova(pygame.sprite.Sprite):
         self.frameOn = 0
         self.castingTime = 0
         self.counter = 0
+        self.canFreeze = False
     def update(self):
 ############starts the animation##############
         self.castingTime += 1
         if (self.castingTime % 7 == 0):
+            self.canFreeze = True
             #if (self.frameOn == 0):
             if (self.frameOn < 7):
                 self.frameOn +=1
                 self.surf = self.animation[self.frameOn]
 
             elif(self.frameOn >6 and self.frameOn < 12):
+                
                 self.counter +=1
                 if (self.counter % 5 == 0):
                     self.surf = self.animation[self.frameOn]
@@ -338,6 +373,7 @@ class IceNova(pygame.sprite.Sprite):
                 self.castingTime = 0
                 self.counter = 0
                 player.castingIceNova = False
+                self.canFreeze = False
                 #self.surf = null#self.animation[self.frameOn]
 
 class Wall(pygame.sprite.Sprite):
@@ -657,6 +693,29 @@ while not done:
                 changeRooms(secondroom)
             player.rect.move_ip(1020,0)
 
+            
+################Spell collision with slime ###########################
+        if (checkCollision(pygame.sprite.Sprite, icenova, slime1)):
+            if (icenova.canFreeze == True):
+                slime1.frozen = True
+                slime1.speed = 0
+            
+############### Player Collision with slime ##########################
+        if (checkCollision(pygame.sprite.Sprite, player,slime1)):
+            if (slime1.frozen == True):
+                if (player.direction == 1):
+                    player.upspeed =0
+                    player.rect.move_ip(0, 1)
+                if (player.direction==2):
+                    player.rightspeed = 0
+                    player.rect.move_ip(-1, 0)
+                if (player.direction==3):
+                    player.downspeed = 0
+                    player.rect.move_ip(0, -1)
+                if (player.direction ==4):
+                    player.leftspeed =0
+                    player.rect.move_ip(1, 0)
+            
         player.update(pressed_keys) ###this calls the update method in player which checks for keypresses and handles movement/attacks
         slime1.update()
         #use the following for collision detection between player and enemies
