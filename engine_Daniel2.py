@@ -295,7 +295,7 @@ class Player(pygame.sprite.Sprite):
             if (self.isCasting == False):#(self.mana >= 10 and self.isCasting ==False):
                 xdistance = self.rect.x - icenova.rect.x - 150
                 ydistance = self.rect.y -icenova.rect.y - 105
-                fireball.rect.move_ip(400, 600)
+                fireball.update()
                 self.isCastingFire = True
                 self.isCasting = True
 
@@ -421,8 +421,9 @@ class Key(pygame.sprite.Sprite):
         self.rect.move_ip(1100,200)
 
 class Fireball(pygame.sprite.Sprite):
-     def __init__(self):
+    def __init__(self):
         super(Fireball, self).__init__()
+        print("fireball class")
         self.surf = pygame.image.load('graphics/orc1.png')
         self.surf = pygame.transform.scale(self.surf,(50,70))
         self.rect = self.surf.get_rect()
@@ -454,7 +455,7 @@ class Fireball(pygame.sprite.Sprite):
                     self.current_frame = 0
                 else:
                     self.current_frame+=1
-        self.surf = self.walk_left_ani[self.current_frame]
+        self.surf = self.left_ani[self.current_frame]
 
     def moveRight(self):
         self.rightspeed = self.speed
@@ -465,10 +466,11 @@ class Fireball(pygame.sprite.Sprite):
                     self.current_frame = 0
                 else:
                     self.current_frame+=1
-        self.surf = self.walk_right_ani[self.current_frame]
+        self.surf = self.right_ani[self.current_frame]
 
     def update(self):
         #print (self.distance)
+        print("updating")
         if self.direction == 0:
             if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallRight1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallRight2)):
                 self.direction = 1
@@ -485,6 +487,41 @@ class Fireball(pygame.sprite.Sprite):
             self.distance = random.randint(100,200)
             self.direction = random.randint(0,1)
             self.newInstruction = False
+        self.castingTime+=1
+        if (self.castingTime %7 == 0):
+            if (self.frameOn < 7):
+                if (self.direction == 1):
+                    self.surf = self.cast_fireball_up_ani[self.frameOn]
+                    #self.surf = fireball.up_ani[self.frameOn]
+                    self.frameOn +=1
+                elif (self.direction == 2):
+                    self.surf = self.cast_fireball_right_ani[self.frameOn]
+                    #self.surf = fireball.right_ani[self.frameOn]
+                    self.frameOn +=1
+                elif (self.direction == 3):
+                    self.surf = self.cast_fireball_down_ani[self.frameOn]
+                    #self.surf = fireball.down_ani[self.frameOn]
+                    self.frameOn +=1
+                if (self.direction == 4):
+                    self.surf = self.cast_fireball_left_ani[self.frameOn]
+                    #self.surf = fireball.left_ani[self.frameOn]
+                    self.frameOn +=1
+            elif (self.frameOn >= 7):
+                #fireball.surf = fireball.animation[0]
+                #self.castingFireball = True
+                self.frameOn = 0
+                self.isCastingFire = False
+                self.isCasting = False
+                self.castingTime = 0
+                if (self.direction == 1):
+                    self.surf = fireball.up_ani[self.frameOn]
+                elif (self.direction == 2):
+                    self.surf = fireball.self_ani[self.frameOn]
+                elif (self.direction == 3):
+                    self.surf = self.down_ani[self.frameOn]
+                if (self.direction == 4):
+                    self.surf = self.walk_left_ani[0]
+                    self.surf = self.left_ani[self.frameOn]
 
 class IceNova(pygame.sprite.Sprite):
     def __init__(self):
