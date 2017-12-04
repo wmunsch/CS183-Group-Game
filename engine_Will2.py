@@ -15,6 +15,18 @@ icenovaicon = pygame.transform.scale(icenovaicon,(80,76))
 icenovaicongrey = pygame.image.load('graphics/icenovaicongrey.png')
 icenovaicongrey = icenovaicongrey.convert()
 icenovaicongrey = pygame.transform.scale(icenovaicongrey,(80,76))
+fireballicon = pygame.image.load('graphics/fireballicon.png')
+fireballicon = fireballicon.convert()
+fireballicon = pygame.transform.scale(fireballicon,(80,76))
+fireballicongrey = pygame.image.load('graphics/fireballicongrey.png')
+fireballicongrey = fireballicongrey.convert()
+fireballicongrey = pygame.transform.scale(fireballicongrey,(80,76))
+lightningicon = pygame.image.load('graphics/lightningicon.png')
+lightningicon = lightningicon.convert()
+lightningicon = pygame.transform.scale(lightningicon,(80,76))
+lightningicongrey = pygame.image.load('graphics/lightningicongrey.png')
+lightningicongrey = lightningicongrey.convert()
+lightningicongrey = pygame.transform.scale(lightningicongrey,(80,76))
 #blackFadeScreen.fill((255,255,255))
 #blackFadeScreen.setAlpha()
 done = False
@@ -32,8 +44,8 @@ class Player(pygame.sprite.Sprite):
         #self.rect = pygame.Rect(40,20,50,100)#self.surf.get_rect()
         #self.rect = self.rect.inflate(-5,-30)
         self.rect.move_ip(600,400) #player spawn point
-        
-        
+
+
         self.walk_up_ani = [pygame.transform.scale(pygame.image.load('graphics/player_walking_upF1.png'),(92,124)),
             pygame.transform.scale(pygame.image.load('graphics/player_walking_upF2.png'),(92,124)),
             pygame.transform.scale(pygame.image.load('graphics/player_walking_upF3.png'),(92,124)),
@@ -59,6 +71,34 @@ class Player(pygame.sprite.Sprite):
             pygame.transform.scale(pygame.image.load('graphics/player_cast_iceF7.png'),(92,124)),
             pygame.transform.scale(pygame.image.load('graphics/player_cast_iceF8.png'),(92,124)),
             pygame.transform.scale(pygame.image.load('graphics/player_cast_iceF9.png'),(92,124))]
+        self.cast_fireball_down_ani = [pygame.transform.scale(pygame.image.load('graphics/player_fireball_downF1.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_downF2.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_downF3.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_downF4.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_downF5.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_downF6.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_downF7.png'),(92,124)),]
+        self.cast_fireball_up_ani = [pygame.transform.scale(pygame.image.load('graphics/player_fireball_upF1.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_upF2.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_upF3.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_upF4.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_upF5.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_upF6.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_upF7.png'),(92,124)),]
+        self.cast_fireball_left_ani = [pygame.transform.scale(pygame.image.load('graphics/player_fireball_leftF1.png'),(100,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_leftF2.png'),(100,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_leftF3.png'),(100,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_leftF4.png'),(100,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_leftF5.png'),(100,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_leftF6.png'),(100,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_leftF7.png'),(100,124)),]
+        self.cast_fireball_right_ani = [pygame.transform.scale(pygame.image.load('graphics/player_fireball_rightF1.png'),(100,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_rightF2.png'),(100,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_rightF3.png'),(100,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_rightF4.png'),(100,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_rightF5.png'),(100,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_rightF6.png'),(100,124)),
+            pygame.transform.scale(pygame.image.load('graphics/player_fireball_rightF7.png'),(100,124)),]
 
 ######## this converts all the colors or something which increases performance############
         for i in range(0,4):
@@ -66,6 +106,13 @@ class Player(pygame.sprite.Sprite):
             self.walk_left_ani[i] = self.walk_left_ani[i].convert_alpha()
             self.walk_right_ani[i] = self.walk_right_ani[i].convert_alpha()
             self.walk_down_ani[i] = self.walk_down_ani[i].convert_alpha()
+        for i in range(0,8):
+            self.cast_ice_ani[i] = self.cast_ice_ani[i].convert_alpha()
+        for i in range(0,6):
+            self.cast_fireball_down_ani[i] = self.cast_fireball_down_ani[i].convert_alpha()
+            self.cast_fireball_up_ani[i] = self.cast_fireball_up_ani[i].convert_alpha()
+            self.cast_fireball_left_ani[i] = self.cast_fireball_left_ani[i].convert_alpha()
+            self.cast_fireball_right_ani[i] = self.cast_fireball_right_ani[i].convert_alpha()
 
         #self.noi = 4
         self.current_frame = 0
@@ -80,6 +127,9 @@ class Player(pygame.sprite.Sprite):
         self.castingIceNova = False
         self.icenovacooldown = 0
         self.startCountingCooldown = False
+        self.isCastingIce = False
+        self.isCastingFire = False
+        self.castingFireball = False
 
 
     def update(self, pressed_keys):
@@ -95,8 +145,8 @@ class Player(pygame.sprite.Sprite):
             if (self.icenovacooldown % 400 == 0):
                 self.startCountingCooldown = False
                 self.icenovacooldown = 0
-############starts the cast animation##############
-        if (self.isCasting == True):
+############starts the cast for ICENOVA animation##############
+        if (self.isCastingIce == True):
             self.castingTime += 1
             if (self.castingTime % 8 == 0):
                 if (self.frameOn < 7):
@@ -112,9 +162,44 @@ class Player(pygame.sprite.Sprite):
                     self.frameOn +=1
                 else:
                     self.frameOn = 0
+                    self.isCastingIce = False
                     self.isCasting = False
                     self.castingTime = 0
                     self.surf = self.walk_down_ani[0]
+############# starts cast for fireball #####################
+        if (self.isCastingFire == True):
+            self.castingTime+=1
+            if (self.castingTime %7 == 0):
+                if (self.frameOn < 7):
+                    if (self.direction == 1):
+                        self.surf = self.cast_fireball_up_ani[self.frameOn]
+                        self.frameOn +=1
+                    elif (self.direction == 2):
+                        self.surf = self.cast_fireball_right_ani[self.frameOn]
+                        self.frameOn +=1
+                    elif (self.direction == 3):
+                        self.surf = self.cast_fireball_down_ani[self.frameOn]
+                        self.frameOn +=1
+                    if (self.direction == 4):
+                        self.surf = self.cast_fireball_left_ani[self.frameOn]
+                        self.frameOn +=1
+                elif (self.frameOn >= 7):
+                    #fireball.surf = fireball.animation[0]
+                    #self.castingFireball = True
+                    self.frameOn = 0
+                    self.isCastingFire = False
+                    self.isCasting = False
+                    self.castingTime = 0
+                    if (self.direction == 1):
+                        self.surf = self.walk_up_ani[0]
+                    elif (self.direction == 2):
+                        self.surf = self.walk_right_ani[0]
+                    elif (self.direction == 3):
+                        self.surf = self.walk_down_ani[0]
+                    if (self.direction == 4):
+                        self.surf = self.walk_left_ani[0]
+
+
 ######### walking up animation ##############
         if pressed_keys[pygame.K_UP]:
             if (self.isCasting == False):
@@ -196,7 +281,15 @@ class Player(pygame.sprite.Sprite):
                 icenova.rect.move_ip(xdistance, ydistance)
                 self.startCountingCooldown = True
                 self.mana -= 10
-                #self.castingIceNova = True
+                self.isCastingIce = True
+                self.isCasting = True
+        elif pressed_keys[pygame.K_1]:
+            if (self.isCasting == False):#(self.mana >= 10 and self.isCasting ==False):
+                #xdistance = self.rect.x - fireball.rect.x - 150
+                #ydistance = self.rect.y -fireball.rect.y - 105
+                #fireball.rect.move_ip(xdistance, ydistance)
+                #self.mana -= 5
+                self.isCastingFire = True
                 self.isCasting = True
 
 
@@ -249,7 +342,7 @@ class Slime(pygame.sprite.Sprite):
             self.walk_right_ani[i] = self.walk_right_ani[i].convert_alpha()
         self.frozen_right = self.frozen_right.convert_alpha()
         self.frozen_left = self.frozen_left.convert_alpha()
-        
+
         self.direction = 0
         self.current_frame = 0
         self.time = 0
@@ -258,7 +351,7 @@ class Slime(pygame.sprite.Sprite):
         self.frozenCounter = 0
         self.distance = 50
         self.newInstruction = False
-    
+
 
     def moveLeft(self):
         self.leftspeed = self.speed
@@ -285,7 +378,7 @@ class Slime(pygame.sprite.Sprite):
     def update(self):
         if (self.frozen == False):
             self.distance -=1
-        print (self.distance)
+        #print (self.distance)
         if self.direction == 0:
             if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallRight1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallRight2)):
                 self.direction = 1
@@ -298,11 +391,11 @@ class Slime(pygame.sprite.Sprite):
                 self.moveLeft()
         if self.distance == 0:
             self.newInstruction = True
-        
+
         if self.frozen == True:
             if (self.direction == 0):
                 self.surf = self.frozen_right
-            else: 
+            else:
                 self.surf = self.frozen_left
             self.frozenCounter +=1
             if (self.frozenCounter == 10):
@@ -313,7 +406,7 @@ class Slime(pygame.sprite.Sprite):
             self.distance = random.randint(100,200)
             self.direction = random.randint(0,1)
             self.newInstruction = False
-                
+
 
 class Key(pygame.sprite.Sprite):
     def __init__(self):
@@ -363,7 +456,7 @@ class IceNova(pygame.sprite.Sprite):
                 self.surf = self.animation[self.frameOn]
 
             elif(self.frameOn >6 and self.frameOn < 12):
-                
+
                 self.counter +=1
                 if (self.counter % 5 == 0):
                     self.surf = self.animation[self.frameOn]
@@ -564,7 +657,16 @@ while not done:
             screen.blit(icenova.surf,icenova.rect)
 
 ####### drawing spell icons #################################
-        if (player.startCountingCooldown == False):
+        if (player.mana >=5):
+            screen.blit(fireballicon,(800,10))
+        else :
+            screen.blit(fireballicongrey,(800,10))
+
+        if (player.mana >=20):
+            screen.blit(lightningicon,(900,10))
+        else :
+            screen.blit(lightningicongrey,(900,10))
+        if (player.startCountingCooldown == False and player.mana >=10):
             screen.blit(icenovaicon,(1000,10))
         else :
             screen.blit(icenovaicongrey,(1000,10))
@@ -697,13 +799,13 @@ while not done:
                 changeRooms(secondroom)
             player.rect.move_ip(1020,0)
 
-            
+
 ################Spell collision with slime ###########################
         if (checkCollision(pygame.sprite.Sprite, icenova, slime1)):
             if (icenova.canFreeze == True):
                 slime1.frozen = True
                 slime1.speed = 0
-            
+
 ############### Player Collision with slime ##########################
         if (checkCollision(pygame.sprite.Sprite, player,slime1)):
             if (slime1.frozen == True):
@@ -719,7 +821,7 @@ while not done:
                 if (player.direction ==4):
                     player.leftspeed =0
                     player.rect.move_ip(1, 0)
-            
+
         player.update(pressed_keys) ###this calls the update method in player which checks for keypresses and handles movement/attacks
         slime1.update()
         #use the following for collision detection between player and enemies
