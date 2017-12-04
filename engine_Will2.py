@@ -41,14 +41,14 @@ class Player(pygame.sprite.Sprite):
         #self.surf = #offset x and y
         self.animation_speed = 10
         self.animation_speed = self.animation_speed
-        self.rect = self.surf.get_rect(width = 50, height= 90)
-        self.rect = self.rect.inflate(20, 40)
+        self.rect = self.surf.get_rect()# self.surf.get_rect(width = 50, height= 90)
+        #self.rect = self.rect.inflate(20, 40)
         #self.rect.center = (self.x+20,self.y+20)
-        #self.hitbox = pygame.Rect(self.rect.x+30,self.rect.y+60,50,70)
+        self.hitbox = pygame.Rect(self.rect.x+25,self.rect.y+55,50,65)
         #self.rect = pygame.Rect(0,0,50,90)#self.surf.get_rect()
         #self.rect = self.rect.inflate(-5,-30)
         self.rect.move_ip(600,400) #player spawn point
-        #self.hitbox.move_ip(self.rect.x,self.rect.y)
+        self.hitbox.move_ip(self.rect.x,self.rect.y)
 
 
         self.walk_up_ani = [pygame.transform.scale(pygame.image.load('graphics/player_walking_upF1.png'),(92,124)),
@@ -214,7 +214,7 @@ class Player(pygame.sprite.Sprite):
                 self.downspeed = 4
                 self.direction = 1
                 self.rect.move_ip(0, -self.upspeed)
-                #self.hitbox.move_ip(0, -self.upspeed)
+                self.hitbox.move_ip(0, -self.upspeed)
                 self.time += 1
                 if (self.time % 12 == 0):
                     if(self.current_frame>2):
@@ -232,7 +232,7 @@ class Player(pygame.sprite.Sprite):
                 self.upspeed = 4
                 self.direction = 3
                 self.rect.move_ip(0, self.downspeed)
-                #self.hitbox.move_ip(0, self.downspeed)
+                self.hitbox.move_ip(0, self.downspeed)
                 self.time += 1
                 if (self.time % 12 == 0):
                     if(self.current_frame>2):
@@ -250,7 +250,7 @@ class Player(pygame.sprite.Sprite):
                 self.upspeed = 4
                 self.direction = 4
                 self.rect.move_ip(-self.leftspeed, 0)
-                #self.hitbox.move_ip(-self.leftspeed, 0)
+                self.hitbox.move_ip(-self.leftspeed, 0)
                 self.time += 1
                 if (self.time % 12 == 0):
                     if(self.current_frame>2):
@@ -268,7 +268,7 @@ class Player(pygame.sprite.Sprite):
                 self.upspeed = 4
                 self.direction = 2
                 self.rect.move_ip(self.rightspeed, 0)
-               # self.hitbox.move_ip(self.rightspeed, 0)
+                self.hitbox.move_ip(self.rightspeed, 0)
                 self.time += 1
                 if (self.time % 12 == 0):
                     if(self.current_frame>2):
@@ -335,8 +335,10 @@ class Slime(pygame.sprite.Sprite):
         self.surf = pygame.image.load('graphics/slime1.png')
         self.surf = pygame.transform.scale(self.surf,(84,88))
         self.rect = pygame.Rect(0,0,50,50)
+        self.hitbox = pygame.Rect(self.rect.x+8,self.rect.y+21,50,35)
         #self.rect = self.surf.get_rect()
         self.rect.move_ip(800,400)
+        self.hitbox.move_ip(self.rect.x,self.rect.y)
         self.animation_speed = 10
         self.walk_left_ani = [pygame.transform.scale(pygame.image.load('graphics/slimeleftF1.png'),(68,60)),
             pygame.transform.scale(pygame.image.load('graphics/slimeleftF2.png'),(68,60)),
@@ -367,6 +369,7 @@ class Slime(pygame.sprite.Sprite):
     def moveLeft(self):
         self.leftspeed = self.speed
         self.rect.move_ip(-self.leftspeed, 0)
+        self.hitbox.move_ip(-self.leftspeed, 0)
         self.time += 1
         if (self.time % 12 == 0):
                 if(self.current_frame>2):
@@ -378,6 +381,7 @@ class Slime(pygame.sprite.Sprite):
     def moveRight(self):
         self.rightspeed = self.speed
         self.rect.move_ip(self.rightspeed, 0)
+        self.hitbox.move_ip(self.rightspeed, 0)
         self.time += 1
         if (self.time % 12 == 0):
                 if(self.current_frame>2):
@@ -655,8 +659,8 @@ sprites_walls = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 
 ## add monster sprites to this group to draw them to the screen
-sprites_alive.add(player)
 sprites_alive.add(slime1)
+sprites_alive.add(player)
 #sprites_alive.add(icenova)
 
 
@@ -706,8 +710,9 @@ while not done:
         pygame.draw.rect(screen,(255,0,0), (102,25,player.health*5,30),0) #draws the health bar
         pygame.draw.rect(screen,(0,0,255), (102,68,player.mana*5,30),0) #draws the mana bar
         screen.blit (ui,(10,10))#draws the ui to the screen
-        pygame.draw.rect(screen,(255,0,0),(player.rect), 0)
-        pygame.draw.rect(screen,(255,0,0),(slime1.rect), 0)
+        #pygame.draw.rect(screen,(0,0,255),(slime1.hitbox),0)
+       # pygame.draw.rect(screen,(255,0,0),(player.rect), 0)
+        #pygame.draw.rect(screen,(255,0,0),(slime1.rect), 0)
         #pygame.draw.rect(screen,(0,0,255),player.hitbox,0)
 ###############These if statements check for collision with player and walls and if true sets the players speed to 0###############
         if(currentroom == fourthroom):
@@ -727,15 +732,19 @@ while not done:
             if (player.direction == 1):
                 player.upspeed =0
                 player.rect.move_ip(0, 1)
+                player.hitbox.move_ip(0, 1)
             if (player.direction==2):
                 player.rightspeed = 0
                 player.rect.move_ip(-1, 0)
+                player.hitbox.move_ip(-1, 0)
             if (player.direction==3):
                 player.downspeed = 0
                 player.rect.move_ip(0, -1)
+                player.hitbox.move_ip(0, -1)
             if (player.direction ==4):
                 player.leftspeed =0
                 player.rect.move_ip(1, 0)
+                player.hitbox.move_ip(1, 0)
             if (currentroom == thirdroom and player.direction == 1):
                 player.upspeed = 0
                 player.rect.move_ip(0,-2)
@@ -747,11 +756,13 @@ while not done:
                     xdistance = thirdroom.leftDoor.rect.x - player.rect.x + 100
                     ydistance = thirdroom.leftDoor.rect.y - player.rect.y + 30
                     player.rect.move_ip(xdistance, ydistance)
+                    player.hitbox.move_ip(xdistance, ydistance)
                     player.surf = player.walk_right_ani[0]
                     player.upspeed = 4
             if (currentroom == thirdroom and player.direction == 4):
                 player.upspeed = 0
                 player.rect.move_ip(-2,0)
+                player.hitbox.move_ip(-2,0)
                 player.falling = True
                 player.fallingTime +=1
                 if (player.fallingTime % 30 == 0):
@@ -760,6 +771,7 @@ while not done:
                     xdistance = thirdroom.leftDoor.rect.x - player.rect.x + 100
                     ydistance = thirdroom.leftDoor.rect.y - player.rect.y + 30
                     player.rect.move_ip(xdistance, ydistance)
+                    player.hitbox.move_ip(xdistance, ydistance)
                     player.surf = player.walk_right_ani[0]
                     player.leftspeed = 4
             if (currentroom == thirdroom and player.direction == 2):
@@ -773,6 +785,7 @@ while not done:
                     xdistance = thirdroom.leftDoor.rect.x - player.rect.x + 100
                     ydistance = thirdroom.leftDoor.rect.y - player.rect.y + 30
                     player.rect.move_ip(xdistance, ydistance)
+                    player.hitbox.move_ip(xdistance, ydistance)
                     player.surf = player.walk_right_ani[0]
                     player.rightspeed = 4
             if (currentroom == thirdroom and player.direction == 3):
@@ -786,6 +799,7 @@ while not done:
                     xdistance = thirdroom.leftDoor.rect.x - player.rect.x + 100
                     ydistance = thirdroom.leftDoor.rect.y - player.rect.y + 30
                     player.rect.move_ip(xdistance, ydistance)
+                    player.hitbox.move_ip(xdistance, ydistance)
                     player.surf = player.walk_right_ani[0]
                     player.downspeed = 4
 
@@ -794,13 +808,15 @@ while not done:
             if (currentroom == firstroom):
                 changeRooms(secondroom)
                 player.rect.move_ip(0,500)
+                player.hitbox.move_ip(0,500)
             elif (currentroom == thirdroom):
                 changeRooms(fourthroom)
                 player.rect.move_ip(0,500)
-
+                player.hitbox.move_ip(0,500)
             elif (currentroom == fourthroom and player.hasKey == True):
                 changeRooms(bossroom)
                 player.rect.move_ip(0,500)
+                player.hitibox.move_ip(0,500)
             elif (currentroom == fourthroom and player.hasKey == False):
                 player.upspeed = 0
         if (checkCollision(pygame.sprite.Sprite, player, currentroom.bottomDoor)):
@@ -811,18 +827,21 @@ while not done:
             elif (currentroom == bossroom):
                 changeRooms(fourthroom)
             player.rect.move_ip(0,-500)
+            player.hitbox.move_ip(0,-500)
         if (checkCollision(pygame.sprite.Sprite, player, currentroom.rightDoor)):
             if (currentroom == firstroom):
                 changeRooms(thirdroom)
             elif (currentroom == secondroom):
                 changeRooms(fourthroom)
             player.rect.move_ip(-1030,0)
+            player.hitbox.move_ip(-1030,0)
         if (checkCollision(pygame.sprite.Sprite, player, currentroom.leftDoor)):
             if (currentroom == thirdroom):
                 changeRooms(firstroom)
             elif (currentroom == fourthroom):
                 changeRooms(secondroom)
             player.rect.move_ip(1020,0)
+            player.hitbox.move_ip(1020,0)
 
 
 ################Spell collision with slime ###########################
@@ -832,21 +851,27 @@ while not done:
                 slime1.speed = 0
 
 ############### Player Collision with slime ##########################
-        if (checkCollision(pygame.sprite.Sprite, player,slime1)):
+        #if (checkCollision(pygame.sprite.Sprite, player,slime1)):
+        if (pygame.Rect.colliderect(player.hitbox, slime1.hitbox)):
             if (slime1.frozen == True):
                 if (player.direction == 1):
                     player.upspeed =0
                     player.rect.move_ip(0, 1)
-                    
+                    player.hitbox.move_ip(0, 1)
                 if (player.direction==2):
                     player.rightspeed = 0
                     player.rect.move_ip(-1, 0)
+                    player.hitbox.move_ip(-1, 0)
                 if (player.direction==3):
                     player.downspeed = 0
                     player.rect.move_ip(0, -1)
+                    player.hitbox.move_ip(0, -1)
                 if (player.direction ==4):
                     player.leftspeed =0
                     player.rect.move_ip(1, 0)
+                    player.hitbox.move_ip(1, 0)
+            #else :
+                #player.hit(slime1.direction)
 
         player.update(pressed_keys) ###this calls the update method in player which checks for keypresses and handles movement/attacks
         slime1.update()
