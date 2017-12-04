@@ -38,12 +38,17 @@ class Player(pygame.sprite.Sprite):
         super(Player, self).__init__()
         self.surf = pygame.image.load('graphics/player_walking_downF1.png')
         self.surf = pygame.transform.scale(self.surf,(92,124))
+        #self.surf = #offset x and y
         self.animation_speed = 10
         self.animation_speed = self.animation_speed
-        self.rect = self.surf.get_rect()
-        #self.rect = pygame.Rect(40,20,50,100)#self.surf.get_rect()
+        self.rect = self.surf.get_rect(width = 50, height= 90)
+        self.rect = self.rect.inflate(20, 40)
+        #self.rect.center = (self.x+20,self.y+20)
+        #self.hitbox = pygame.Rect(self.rect.x+30,self.rect.y+60,50,70)
+        #self.rect = pygame.Rect(0,0,50,90)#self.surf.get_rect()
         #self.rect = self.rect.inflate(-5,-30)
         self.rect.move_ip(600,400) #player spawn point
+        #self.hitbox.move_ip(self.rect.x,self.rect.y)
 
 
         self.walk_up_ani = [pygame.transform.scale(pygame.image.load('graphics/player_walking_upF1.png'),(92,124)),
@@ -133,6 +138,7 @@ class Player(pygame.sprite.Sprite):
 
 
     def update(self, pressed_keys):
+        
         if (self.falling == False and self.fallingTime > 0):
             self.fallingTime = 0
 ###########auto mana regen over time####################
@@ -208,6 +214,7 @@ class Player(pygame.sprite.Sprite):
                 self.downspeed = 4
                 self.direction = 1
                 self.rect.move_ip(0, -self.upspeed)
+                #self.hitbox.move_ip(0, -self.upspeed)
                 self.time += 1
                 if (self.time % 12 == 0):
                     if(self.current_frame>2):
@@ -225,6 +232,7 @@ class Player(pygame.sprite.Sprite):
                 self.upspeed = 4
                 self.direction = 3
                 self.rect.move_ip(0, self.downspeed)
+                #self.hitbox.move_ip(0, self.downspeed)
                 self.time += 1
                 if (self.time % 12 == 0):
                     if(self.current_frame>2):
@@ -242,6 +250,7 @@ class Player(pygame.sprite.Sprite):
                 self.upspeed = 4
                 self.direction = 4
                 self.rect.move_ip(-self.leftspeed, 0)
+                #self.hitbox.move_ip(-self.leftspeed, 0)
                 self.time += 1
                 if (self.time % 12 == 0):
                     if(self.current_frame>2):
@@ -259,6 +268,7 @@ class Player(pygame.sprite.Sprite):
                 self.upspeed = 4
                 self.direction = 2
                 self.rect.move_ip(self.rightspeed, 0)
+               # self.hitbox.move_ip(self.rightspeed, 0)
                 self.time += 1
                 if (self.time % 12 == 0):
                     if(self.current_frame>2):
@@ -324,7 +334,8 @@ class Slime(pygame.sprite.Sprite):
         super(Slime, self).__init__()
         self.surf = pygame.image.load('graphics/slime1.png')
         self.surf = pygame.transform.scale(self.surf,(84,88))
-        self.rect = self.surf.get_rect()
+        self.rect = pygame.Rect(0,0,50,50)
+        #self.rect = self.surf.get_rect()
         self.rect.move_ip(800,400)
         self.animation_speed = 10
         self.walk_left_ani = [pygame.transform.scale(pygame.image.load('graphics/slimeleftF1.png'),(68,60)),
@@ -522,7 +533,7 @@ class Room2:
     wallMiddle4 = Wall(0,0,0,0)
     topDoor = Wall(0,0,0,0)
     bottomDoor = Wall(570,620,150,40)
-    rightDoor = Wall(1180,240,100,180)
+    rightDoor = Wall(1200,240,100,180)
     leftDoor = Wall(0,0,0,0)
 
 class Room3:
@@ -592,6 +603,18 @@ class Bossroom:
     rightDoor = Wall(0,0,0,0)
     leftDoor = Wall(0,0,0,0)
 
+class Fireball(pygame.sprite.Sprite):
+     def __init__(self):
+        super(Fireball, self).__init__()
+        self.surf = pygame.image.load('graphics/fireballD1.png')
+        self.surf = pygame.transform.scale(self.surf,(50,70))
+        self.rect = self.surf.get_rect()
+        self.rect.move_ip(400,200)
+        self.moving_left = [pygame.transform.scale(pygame.image.load('graphics/fireballL1.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/fireballL2.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/fireballL3.png'),(92,124)),
+            pygame.transform.scale(pygame.image.load('graphics/fireballL4.png'),(92,124))]
+    
 
 #use this to update the current room when changing rooms
 #def updateCurrentRoom(room):
@@ -683,7 +706,9 @@ while not done:
         pygame.draw.rect(screen,(255,0,0), (102,25,player.health*5,30),0) #draws the health bar
         pygame.draw.rect(screen,(0,0,255), (102,68,player.mana*5,30),0) #draws the mana bar
         screen.blit (ui,(10,10))#draws the ui to the screen
-
+        pygame.draw.rect(screen,(255,0,0),(player.rect), 0)
+        pygame.draw.rect(screen,(255,0,0),(slime1.rect), 0)
+        #pygame.draw.rect(screen,(0,0,255),player.hitbox,0)
 ###############These if statements check for collision with player and walls and if true sets the players speed to 0###############
         if(currentroom == fourthroom):
             if (checkCollision(pygame.sprite.Sprite,player, bosskey)):
@@ -812,6 +837,7 @@ while not done:
                 if (player.direction == 1):
                     player.upspeed =0
                     player.rect.move_ip(0, 1)
+                    
                 if (player.direction==2):
                     player.rightspeed = 0
                     player.rect.move_ip(-1, 0)
