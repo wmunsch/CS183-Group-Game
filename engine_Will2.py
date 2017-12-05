@@ -1,7 +1,7 @@
 #Main engine
 import pygame
 import random
-
+import math
 pygame.init()
 screen = pygame.display.set_mode((1280, 720))
 blackFadeScreen = pygame.Surface((1280,720))
@@ -138,7 +138,7 @@ class Player(pygame.sprite.Sprite):
 
 
     def update(self, pressed_keys):
-        
+
         if (self.falling == False and self.fallingTime > 0):
             self.fallingTime = 0
 ###########auto mana regen over time####################
@@ -330,14 +330,14 @@ class Player(pygame.sprite.Sprite):
 class Slime(pygame.sprite.Sprite):
     seenPlayer = False
     #direction = 1
-    def __init__(self):
+    def __init__(self, x, y):
         super(Slime, self).__init__()
         self.surf = pygame.image.load('graphics/slime1.png')
         self.surf = pygame.transform.scale(self.surf,(84,88))
         self.rect = pygame.Rect(0,0,50,50)
         self.hitbox = pygame.Rect(self.rect.x+8,self.rect.y+21,50,35)
         #self.rect = self.surf.get_rect()
-        self.rect.move_ip(800,400)
+        self.rect.move_ip(x,y)
         self.hitbox.move_ip(self.rect.x,self.rect.y)
         self.animation_speed = 10
         self.walk_left_ani = [pygame.transform.scale(pygame.image.load('graphics/slimeleftF1.png'),(68,60)),
@@ -348,6 +348,11 @@ class Slime(pygame.sprite.Sprite):
             pygame.transform.scale(pygame.image.load('graphics/slimerightF2.png'),(68,60)),
             pygame.transform.scale(pygame.image.load('graphics/slimerightF3.png'),(68,60)),
             pygame.transform.scale(pygame.image.load('graphics/slimerightF4.png'),(68,60))]
+        self.death_ani = [pygame.transform.scale(pygame.image.load('graphics/slimedeathF1.png'),(100,92)),
+            pygame.transform.scale(pygame.image.load('graphics/slimedeathF2.png'),(100,92)),
+            pygame.transform.scale(pygame.image.load('graphics/slimedeathF3.png'),(100,92)),
+            pygame.transform.scale(pygame.image.load('graphics/slimedeathF4.png'),(100,92)),
+            pygame.transform.scale(pygame.image.load('graphics/slimedeathF5.png'),(100,92))]
         self.frozen_right = pygame.transform.scale(pygame.image.load('graphics/slimefrozenright.png'),(68,60))
         self.frozen_left = pygame.transform.scale(pygame.image.load('graphics/slimefrozenleft.png'),(68,60))
         for i in range(0,4):
@@ -364,6 +369,7 @@ class Slime(pygame.sprite.Sprite):
         self.frozenCounter = 0
         self.distance = 50
         self.newInstruction = False
+        self.isAlive = True
 
 
     def moveLeft(self):
@@ -390,20 +396,95 @@ class Slime(pygame.sprite.Sprite):
                     self.current_frame+=1
         self.surf = self.walk_right_ani[self.current_frame]
 
+    def moveUp(self):
+        self.upspeed = self.speed
+        self.rect.move_ip(0, -self.speed)
+        self.time += 1
+        if (self.time % 12 == 0):
+            if(self.current_frame>2):
+                self.current_frame = 0
+            else:
+                self.current_frame+=1
+        self.surf = self.walk_left_ani[self.current_frame]
+
+    def moveDown(self):
+        self.downspeed = self.speed
+        self.rect.move_ip(0, self.speed)
+        self.time += 1
+        if (self.time % 12 == 0):
+            if(self.current_frame>2):
+                self.current_frame = 0
+            else:
+                self.current_frame+=1
+
+        self.surf = self.walk_right_ani[self.current_frame]
+    ############slime chase function#############
+    def chase(self, player_rect):
+        c = math.sqrt((player_rect.x - self.rect.x) ** 2 + (player_rect.y - self.rect.y)**2)
+        try:
+            x = (player_rect.x - self.rect.x) /c
+            y = (player_rect.y - self.rect.y)/c
+        except ZeroDivisionError:
+            return False
+        return(x,y)
+
+###### this resets slime and spawns it when changing rooms##########
+    def spawn(self, room):
+        self.isAlive = True
+
+##### run this method when slime dies###########
+    def die(self):
+        self.time += 1
+        if (self.time % 12 == 0):
+            if(self.current_frame>3):
+                self.isAlive = False
+                self.current_frame = 0
+            else:
+                self.current_frame+=1
+        self.surf = self.death_ani[self.current_frame]
     def update(self):
+        ########The following three lines enable the slime chase function#############
+        #new_pos = self.chase(player.hitbox)
+        #if new_pos :
+            #self.rect.x, self.rect.y = (self.rect.x + new_pos[0] * self.speed, self.rect.y + new_pos[1] * self.speed)
+
+
         if (self.frozen == False):
             self.distance -=1
         #print (self.distance)
         if self.direction == 0:
-            if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallRight1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallRight2)):
+            if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallRight1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallRight2)or checkCollision(pygame.sprite.Sprite, self,currentroom.rightDoor)):
                 self.direction = 1
             else:
                 self.moveRight()
-        if self.direction == 1:
-            if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallLeft1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallLeft2)):
+        elif self.direction == 1:
+            if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallLeft1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallLeft2) or checkCollision(pygame.sprite.Sprite, self,currentroom.leftDoor)):
                 self.direction = 0
             else:
                 self.moveLeft()
+        elif self.direction == 2:
+            if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallTop1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallTop2) or checkCollision(pygame.sprite.Sprite, self,currentroom.topDoor)):
+                self.direction = 3
+            else:
+                self.moveUp()
+        elif self.direction == 3:
+            if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallBottom1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallBottom2) or checkCollision(pygame.sprite.Sprite, self,currentroom.bottomDoor)):
+                self.direction = 2
+            else:
+                self.moveDown()
+
+        if (checkCollision(pygame.sprite.Sprite, self, currentroom.wallMiddle) or checkCollision(pygame.sprite.Sprite, self, currentroom.wallMiddle2) or checkCollision(pygame.sprite.Sprite, self, currentroom.wallMiddle3) or
+        checkCollision(pygame.sprite.Sprite, self, currentroom.wallMiddle4)):
+            if (self.direction == 1):
+                self.direction = 0
+            elif (self.direction==2):
+                self.direction = 3
+            elif (self.direction==3):
+                self.direction = 2
+            elif (self.direction ==0):
+                self.direction = 1
+
+
         if self.distance == 0:
             self.newInstruction = True
 
@@ -419,7 +500,7 @@ class Slime(pygame.sprite.Sprite):
                 self.speed = 1
         if (self.newInstruction ==True):
             self.distance = random.randint(100,200)
-            self.direction = random.randint(0,1)
+            self.direction = random.randint(0,3)
             self.newInstruction = False
 
 
@@ -516,6 +597,8 @@ class room1:
     bottomDoor = Wall(0,0,0,0)
     rightDoor = Wall(1200,240,100,180)
     leftDoor = Wall(0,0,0,0)
+    spawnP1 = [400,300]
+    spawnP2 = [800,200]
 
 
 class Room2:
@@ -618,7 +701,7 @@ class Fireball(pygame.sprite.Sprite):
             pygame.transform.scale(pygame.image.load('graphics/fireballL2.png'),(92,124)),
             pygame.transform.scale(pygame.image.load('graphics/fireballL3.png'),(92,124)),
             pygame.transform.scale(pygame.image.load('graphics/fireballL4.png'),(92,124))]
-    
+
 
 #use this to update the current room when changing rooms
 #def updateCurrentRoom(room):
@@ -645,7 +728,8 @@ def checkCollision(self, sprite1, sprite2):
 
 
 icenova = IceNova()
-slime1 = Slime()
+slime1 = Slime(800,400)
+slime2 = Slime(200,400)
 player = Player()
 firstroom = room1()
 bosskey = Key()
@@ -660,6 +744,7 @@ all_sprites = pygame.sprite.Group()
 
 ## add monster sprites to this group to draw them to the screen
 sprites_alive.add(slime1)
+sprites_alive.add(slime2)
 sprites_alive.add(player)
 #sprites_alive.add(icenova)
 
@@ -875,6 +960,7 @@ while not done:
 
         player.update(pressed_keys) ###this calls the update method in player which checks for keypresses and handles movement/attacks
         slime1.update()
+        slime2.update()
         #use the following for collision detection between player and enemies
         #if pygame.sprite.spritecollideany(player, enemies):
             #player takes damage and is pushed back?
