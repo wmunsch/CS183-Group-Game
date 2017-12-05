@@ -1,1 +1,1 @@
-python3 -m pip install pygame --user
+python -m pip install pygame --user
