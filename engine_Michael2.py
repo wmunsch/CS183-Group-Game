@@ -503,7 +503,7 @@ class Slime(pygame.sprite.Sprite):
             self.direction = random.randint(0,3)
             self.newInstruction = False
 
-        if (self.rect.colliderect(player)) and (self.frozen == False):
+        if (self.rect.colliderect(player)) and (self.frozen == False) and (player.isCasting == False):
             #print("HIT------------")
             self.touchingPlayer = True
         
