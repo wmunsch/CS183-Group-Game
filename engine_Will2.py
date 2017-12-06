@@ -2,9 +2,11 @@
 import pygame
 import random
 import math
+
 pygame.init()
 screen = pygame.display.set_mode((1280, 720))
-blackFadeScreen = pygame.Surface((1280,720))
+#blackFadeScreen = pygame.Surface((1280,720))
+#blackFadeScreen = pygame.Rect(0,0,1280,720)
 #ui = pygame.Surface(())
 ui = pygame.image.load('graphics/charUI.png')
 ui = ui.convert_alpha()
@@ -31,8 +33,8 @@ lightningicongrey = pygame.transform.scale(lightningicongrey,(80,76))
 #blackFadeScreen.setAlpha()
 done = False
 framerate = pygame.time.Clock()
-
-
+key_room = random.randint(2,4)
+key_slime = random.randint(1,2)
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super(Player, self).__init__()
@@ -131,13 +133,26 @@ class Player(pygame.sprite.Sprite):
         self.frameOn = 0
         self.castingIceNova = False
         self.icenovacooldown = 0
+        self.fireballcooldown = 0
+        self.fireCountingCooldown = False
         self.startCountingCooldown = False
         self.isCastingIce = False
         self.isCastingFire = False
         self.castingFireball = False
+        self.spawnFireball = False
+        self.invulnerable = False
+        self.godTimer = 0
 
 
     def update(self, pressed_keys):
+######### makes it so player can only be hit once every second ############
+        if (self.invulnerable == True):
+            self.surf
+            self.godTimer +=1
+            if (self.godTimer >= 80):
+                self.invulnerable = False
+                self.godTimer = 0
+
 
         if (self.falling == False and self.fallingTime > 0):
             self.fallingTime = 0
@@ -151,10 +166,16 @@ class Player(pygame.sprite.Sprite):
             if (self.icenovacooldown % 400 == 0):
                 self.startCountingCooldown = False
                 self.icenovacooldown = 0
+
+        if (self.fireCountingCooldown == True):
+            self.fireballcooldown +=1
+            if (self.fireballcooldown % 100 == 0):
+                self.fireCountingCooldown = False
+                self.fireballcooldown = 0
 ############starts the cast for ICENOVA animation##############
         if (self.isCastingIce == True):
             self.castingTime += 1
-            if (self.castingTime % 8 == 0):
+            if (self.castingTime % 5 == 0):
                 if (self.frameOn < 7):
                     self.surf = self.cast_ice_ani[self.frameOn]
                     self.frameOn +=1
@@ -175,7 +196,7 @@ class Player(pygame.sprite.Sprite):
 ############# starts cast for fireball #####################
         if (self.isCastingFire == True):
             self.castingTime+=1
-            if (self.castingTime %7 == 0):
+            if (self.castingTime %5 == 0):
                 if (self.frameOn < 7):
                     if (self.direction == 1):
                         self.surf = self.cast_fireball_up_ani[self.frameOn]
@@ -192,17 +213,24 @@ class Player(pygame.sprite.Sprite):
                 elif (self.frameOn >= 7):
                     #fireball.surf = fireball.animation[0]
                     #self.castingFireball = True
+                    self.fireCountingCooldown == True
                     self.frameOn = 0
                     self.isCastingFire = False
                     self.isCasting = False
+                    self.spawnFireball = True
+                    fireball.isActive = True
                     self.castingTime = 0
                     if (self.direction == 1):
+                        fireball.direction = 1
                         self.surf = self.walk_up_ani[0]
                     elif (self.direction == 2):
+                        fireball.direction = 2
                         self.surf = self.walk_right_ani[0]
                     elif (self.direction == 3):
+                        fireball.direction = 3
                         self.surf = self.walk_down_ani[0]
                     if (self.direction == 4):
+                        fireball.direction = 4
                         self.surf = self.walk_left_ani[0]
 
 
@@ -294,13 +322,27 @@ class Player(pygame.sprite.Sprite):
                 self.isCastingIce = True
                 self.isCasting = True
         elif pressed_keys[pygame.K_1]:
-            if (self.isCasting == False):#(self.mana >= 10 and self.isCasting ==False):
-                #xdistance = self.rect.x - fireball.rect.x - 150
-                #ydistance = self.rect.y -fireball.rect.y - 105
-                #fireball.rect.move_ip(xdistance, ydistance)
+            if (self.isCasting == False and self.fireCountingCooldown == False and self.mana >= 10):# and fireball.isActive == False):#(self.mana >= 10 and self.isCasting ==False):
+                if (self.direction == 1):
+                    xdistance = self.rect.x - fireball.rect.x + 60
+                    ydistance = self.rect.y -fireball.rect.y +20
+                    fireball.rect.move_ip(xdistance, ydistance)
+                elif (self.direction ==2):
+                    xdistance = self.rect.x - fireball.rect.x + 30
+                    ydistance = self.rect.y -fireball.rect.y + 55
+                    fireball.rect.move_ip(xdistance, ydistance)
+                elif (self.direction ==3):
+                    xdistance = self.rect.x - fireball.rect.x
+                    ydistance = self.rect.y -fireball.rect.y + 20
+                    fireball.rect.move_ip(xdistance, ydistance)
+                elif (self.direction ==4):
+                    xdistance = self.rect.x - fireball.rect.x - 30
+                    ydistance = self.rect.y -fireball.rect.y +30
+                    fireball.rect.move_ip(xdistance, ydistance)
                 #self.mana -= 5
                 self.isCastingFire = True
                 self.isCasting = True
+                self.fireCountingCooldown = True
 
 
 
@@ -334,7 +376,7 @@ class Slime(pygame.sprite.Sprite):
         super(Slime, self).__init__()
         self.surf = pygame.image.load('graphics/slime1.png')
         self.surf = pygame.transform.scale(self.surf,(84,88))
-        self.rect = pygame.Rect(0,0,50,50)
+        self.rect = pygame.Rect(0,0,70,70)
         self.hitbox = pygame.Rect(self.rect.x+8,self.rect.y+21,50,35)
         #self.rect = self.surf.get_rect()
         self.rect.move_ip(x,y)
@@ -358,6 +400,7 @@ class Slime(pygame.sprite.Sprite):
         for i in range(0,4):
             self.walk_left_ani[i] = self.walk_left_ani[i].convert_alpha()
             self.walk_right_ani[i] = self.walk_right_ani[i].convert_alpha()
+            self.death_ani[i] = self.death_ani[i].convert_alpha()
         self.frozen_right = self.frozen_right.convert_alpha()
         self.frozen_left = self.frozen_left.convert_alpha()
 
@@ -370,6 +413,8 @@ class Slime(pygame.sprite.Sprite):
         self.distance = 50
         self.newInstruction = False
         self.isAlive = True
+        self.isDying = False
+        self.dyingtime = 0
 
 
     def moveLeft(self):
@@ -399,6 +444,7 @@ class Slime(pygame.sprite.Sprite):
     def moveUp(self):
         self.upspeed = self.speed
         self.rect.move_ip(0, -self.speed)
+        self.hitbox.move_ip(0, -self.speed)
         self.time += 1
         if (self.time % 12 == 0):
             if(self.current_frame>2):
@@ -410,6 +456,7 @@ class Slime(pygame.sprite.Sprite):
     def moveDown(self):
         self.downspeed = self.speed
         self.rect.move_ip(0, self.speed)
+        self.hitbox.move_ip(0, self.speed)
         self.time += 1
         if (self.time % 12 == 0):
             if(self.current_frame>2):
@@ -428,20 +475,21 @@ class Slime(pygame.sprite.Sprite):
             return False
         return(x,y)
 
-###### this resets slime and spawns it when changing rooms##########
-    def spawn(self, room):
-        self.isAlive = True
 
-##### run this method when slime dies###########
-    def die(self):
-        self.time += 1
-        if (self.time % 12 == 0):
-            if(self.current_frame>3):
-                self.isAlive = False
-                self.current_frame = 0
-            else:
-                self.current_frame+=1
-        self.surf = self.death_ani[self.current_frame]
+###### this resets slime and spawns it when changing rooms##########
+    def spawn(self, posx, posy):
+        if (self.isSpawning == True):
+            self.current_frame = 0
+            distx = posx - self.rect.x
+            disty = posy - self.rect.y
+            self.rect.move_ip(distx,disty)
+            self.hitbox.move_ip(distx,disty)
+            self.isSpawning = False
+        self.isAlive = True
+        #self.isSpawning = False
+
+
+
     def update(self):
         ########The following three lines enable the slime chase function#############
         #new_pos = self.chase(player.hitbox)
@@ -451,27 +499,38 @@ class Slime(pygame.sprite.Sprite):
 
         if (self.frozen == False):
             self.distance -=1
-        #print (self.distance)
-        if self.direction == 0:
-            if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallRight1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallRight2)or checkCollision(pygame.sprite.Sprite, self,currentroom.rightDoor)):
-                self.direction = 1
-            else:
-                self.moveRight()
-        elif self.direction == 1:
-            if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallLeft1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallLeft2) or checkCollision(pygame.sprite.Sprite, self,currentroom.leftDoor)):
-                self.direction = 0
-            else:
-                self.moveLeft()
-        elif self.direction == 2:
-            if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallTop1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallTop2) or checkCollision(pygame.sprite.Sprite, self,currentroom.topDoor)):
-                self.direction = 3
-            else:
-                self.moveUp()
-        elif self.direction == 3:
-            if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallBottom1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallBottom2) or checkCollision(pygame.sprite.Sprite, self,currentroom.bottomDoor)):
-                self.direction = 2
-            else:
-                self.moveDown()
+        if (self.isAlive == True):
+            if self.direction == 0:
+                if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallRight1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallRight2)or checkCollision(pygame.sprite.Sprite, self,currentroom.rightDoor)):
+                    self.direction = 1
+                else:
+                    self.moveRight()
+            elif self.direction == 1:
+                if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallLeft1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallLeft2) or checkCollision(pygame.sprite.Sprite, self,currentroom.leftDoor)):
+                    self.direction = 0
+                else:
+                    self.moveLeft()
+            elif self.direction == 2:
+                if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallTop1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallTop2) or checkCollision(pygame.sprite.Sprite, self,currentroom.topDoor)):
+                    self.direction = 3
+                else:
+                    self.moveUp()
+            elif self.direction == 3:
+                if (checkCollision(pygame.sprite.Sprite, self,currentroom.wallBottom1) or checkCollision(pygame.sprite.Sprite, self,currentroom.wallBottom2) or checkCollision(pygame.sprite.Sprite, self,currentroom.bottomDoor)):
+                    self.direction = 2
+                else:
+                    self.moveDown()
+
+        elif (self.isAlive == False):
+            if (self.isDying == True):
+                self.dyingtime += 1
+                if (self.dyingtime % 7 == 0):
+                    if(self.current_frame>3):
+                        self.isDying = False
+                        self.dyingtime = 0
+                    else:
+                        self.current_frame+=1
+                self.surf = self.death_ani[self.current_frame]
 
         if (checkCollision(pygame.sprite.Sprite, self, currentroom.wallMiddle) or checkCollision(pygame.sprite.Sprite, self, currentroom.wallMiddle2) or checkCollision(pygame.sprite.Sprite, self, currentroom.wallMiddle3) or
         checkCollision(pygame.sprite.Sprite, self, currentroom.wallMiddle4)):
@@ -488,7 +547,7 @@ class Slime(pygame.sprite.Sprite):
         if self.distance == 0:
             self.newInstruction = True
 
-        if self.frozen == True:
+        if (self.frozen == True and self.isAlive == True):
             if (self.direction == 0):
                 self.surf = self.frozen_right
             else:
@@ -497,7 +556,7 @@ class Slime(pygame.sprite.Sprite):
             if (self.frozenCounter == 10):
                 self.frozen = False
                 self.frozenCounter = 0
-                self.speed = 1
+                self.speed = 2
         if (self.newInstruction ==True):
             self.distance = random.randint(100,200)
             self.direction = random.randint(0,3)
@@ -505,11 +564,18 @@ class Slime(pygame.sprite.Sprite):
 
 
 class Key(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, roomnum, slimenum):
+        super(Key, self).__init__()
         self.surf = pygame.image.load('graphics/bosskey.png')
         self.surf = pygame.transform.scale(self.surf,(28,64))
         self.rect = self.surf.get_rect()
         self.rect.move_ip(1100,200)
+        self.room = roomnum
+        self.slimenum = slimenum
+    def update(self, slimerect):
+        distx = slimerect.x - self.rect.x +25
+        disty = slimerect.y - self.rect.y
+        self.rect.move_ip(distx,disty)
 
 class IceNova(pygame.sprite.Sprite):
     def __init__(self):
@@ -569,6 +635,63 @@ class IceNova(pygame.sprite.Sprite):
                 self.canFreeze = False
                 #self.surf = null#self.animation[self.frameOn]
 
+class Fireball(pygame.sprite.Sprite):
+    def __init__(self):
+        super(Fireball, self).__init__()
+        self.surf = pygame.image.load('graphics/fireballD1.png')
+        self.surf = pygame.transform.scale(self.surf,(68,60))
+        self.rect = self.surf.get_rect()
+        self.rect.move_ip(400,200)
+        self.down_ani = [pygame.transform.scale(pygame.image.load('graphics/fireballD1.png'),(32,76)),
+            pygame.transform.scale(pygame.image.load('graphics/fireballD2.png'),(32,76)),
+            pygame.transform.scale(pygame.image.load('graphics/fireballD3.png'),(32,76)),
+            pygame.transform.scale(pygame.image.load('graphics/fireballD4.png'),(32,76))]
+        self.left_ani = [pygame.transform.scale(pygame.image.load('graphics/fireballL1.png'),(76,32)),
+            pygame.transform.scale(pygame.image.load('graphics/fireballL2.png'),(76,32)),
+            pygame.transform.scale(pygame.image.load('graphics/fireballL3.png'),(76,32)),
+            pygame.transform.scale(pygame.image.load('graphics/fireballL4.png'),(76,32))]
+        self.up_ani = [pygame.transform.scale(pygame.image.load('graphics/fireballU1.png'),(32,76)),
+            pygame.transform.scale(pygame.image.load('graphics/fireballU2.png'),(32,76)),
+            pygame.transform.scale(pygame.image.load('graphics/fireballU3.png'),(32,76)),
+            pygame.transform.scale(pygame.image.load('graphics/fireballU4.png'),(32,76))]
+        self.right_ani = [pygame.transform.scale(pygame.image.load('graphics/fireballR1.png'),(76,32)),
+            pygame.transform.scale(pygame.image.load('graphics/fireballR2.png'),(76,32)),
+            pygame.transform.scale(pygame.image.load('graphics/fireballR3.png'),(76,32)),
+            pygame.transform.scale(pygame.image.load('graphics/fireballR4.png'),(76,32))]
+
+        self.frameOn = 0
+        self.castingTime = 0
+        self.counter = 0
+        self.direction = 1
+        self.isActive = False
+
+    def update(self):
+        if (self.isActive == True):
+            self.castingTime += 1
+            if (self.castingTime % 7 == 0):
+                if (self.frameOn < 3):
+                    self.frameOn +=1
+                else : self.frameOn = 0
+            if (self.direction == 1):
+                self.surf = self.up_ani[self.frameOn]
+                self.rect.move_ip(0,-7)
+            elif (self.direction == 2):
+                self.surf = self.right_ani[self.frameOn]
+                self.rect.move_ip(7,0)
+            elif (self.direction == 3):
+                self.surf = self.down_ani[self.frameOn]
+                self.rect.move_ip(0,7)
+            elif (self.direction == 4):
+                self.surf = self.left_ani[self.frameOn]
+                self.rect.move_ip(-7,0)
+        if (self.castingTime >=60):
+            #player.firecountingCooldown = False
+            self.isActive = False
+            player.spawnFireball = False
+            self.castingTime = 0
+            self.rect.move_ip(10000,1000)
+
+
 class Wall(pygame.sprite.Sprite):
     def __init__(self,x,y,width,height):
         pygame.sprite.Sprite.__init__(self)
@@ -585,11 +708,11 @@ class room1:
     wallLeft2 = Wall(0,0,0,0)
     wallRight1 = Wall(1180,0,100,240)
     wallRight2 = Wall(1180,420,100,160)
-    wallTop1 = Wall(0,0,570,50)
-    wallTop2 = Wall(720,0,560,50)
+    wallTop1 = Wall(0,0,570,90)
+    wallTop2 = Wall(720,0,560,90)
     wallBottom1 = Wall(0,600,1280,60)
     wallBottom2 = Wall(0,0,0,0)
-    wallMiddle = Wall(300,0,180,330)
+    wallMiddle = Wall(300,0,180,370)
     wallMiddle2 = Wall(0,0,0,0)
     wallMiddle3 = Wall(0,0,0,0)
     wallMiddle4 = Wall(0,0,0,0)
@@ -597,8 +720,6 @@ class room1:
     bottomDoor = Wall(0,0,0,0)
     rightDoor = Wall(1200,240,100,180)
     leftDoor = Wall(0,0,0,0)
-    spawnP1 = [400,300]
-    spawnP2 = [800,200]
 
 
 class Room2:
@@ -610,12 +731,12 @@ class Room2:
     wallLeft2 = Wall(0,0,0,0)
     wallRight1 = Wall(1180,0,100,240)
     wallRight2 = Wall(1180,420,100,160)
-    wallTop1 = Wall(0,0,1280,50)
+    wallTop1 = Wall(0,0,1280,90)
     wallTop2 = Wall(0,0,0,0)
     wallBottom1 = Wall(0,600,570,50)
     wallBottom2 = Wall(720,600,560,50)
-    wallMiddle = Wall(310,300,160,130)
-    wallMiddle2 = Wall(790,300,160,130)
+    wallMiddle = Wall(310,300,160,170)
+    wallMiddle2 = Wall(790,300,160,170)
     wallMiddle3 = Wall(0,0,0,0)
     wallMiddle4 = Wall(0,0,0,0)
     topDoor = Wall(0,0,0,0)
@@ -632,14 +753,14 @@ class Room3:
     wallLeft2 = Wall(0,420,100,160)
     wallRight1 = Wall(1180,0,100,720)
     wallRight2 = Wall(0,0,0,0)
-    wallTop1 = Wall(0,0,570,50)
-    wallTop2 = Wall(720,0,560,50)
+    wallTop1 = Wall(0,0,570,90)
+    wallTop2 = Wall(720,0,560,90)
     wallBottom1 = Wall(0,600,1280,60)
     wallBottom2 = Wall(0,0,0,0)
-    wallMiddle = Wall(100,50,350,150)
-    wallMiddle2 = Wall(100,430,350,300)
-    wallMiddle3 = Wall(820,50,200,350)
-    wallMiddle4 = Wall(900,50,500,160)
+    wallMiddle = Wall(100,50,350,190)
+    wallMiddle2 = Wall(100,430,350,340)
+    wallMiddle3 = Wall(820,50,200,390)
+    wallMiddle4 = Wall(900,50,500,200)
     topDoor = Wall(570,0,150,10)
     bottomDoor = Wall(0,0,0,0)
     rightDoor = Wall(0,0,0,0)
@@ -655,13 +776,13 @@ class Room4:
     wallLeft2 = Wall(0,420,100,160)
     wallRight1 = Wall(1180,0,100,720)
     wallRight2 = Wall(0,0,0,0)
-    wallTop1 = Wall(0,0,570,50)
-    wallTop2 = Wall(720,0,560,50)
+    wallTop1 = Wall(0,0,570,90)
+    wallTop2 = Wall(720,0,560,90)
     wallBottom1 = Wall(0,600,570,50)
     wallBottom2 = Wall(720,600,560,50)
-    wallMiddle = Wall(500,50,70,70)
-    wallMiddle2 = Wall(700,50,65,75)
-    wallMiddle3 = Wall(990,400,60,30)
+    wallMiddle = Wall(500,50,70,140)
+    wallMiddle2 = Wall(700,50,65,135)
+    wallMiddle3 = Wall(990,400,60,80)
     wallMiddle4 = Wall(0,0,0,0)
     topDoor = Wall(570,0,150,10)
     bottomDoor = Wall(570,620,150,40)
@@ -677,30 +798,19 @@ class Bossroom:
     wallLeft2 = Wall(0,0,0,0)
     wallRight1 = Wall(1180,0,100,720)
     wallRight2 = Wall(0,0,0,0)
-    wallTop1 = Wall(0,0,1280,50)
+    wallTop1 = Wall(0,0,1280,90)
     wallTop2 = Wall(0,0,0,0)
     wallBottom1 = Wall(0,600,570,50)
     wallBottom2 = Wall(720,600,560,50)
-    wallMiddle = Wall(0,200,460,110)
-    wallMiddle2 = Wall(800,200,500,110)
-    wallMiddle3 = Wall(460,100,400,110)
+    wallMiddle = Wall(0,200,480,170)
+    wallMiddle2 = Wall(800,200,500,170)
+    wallMiddle3 = Wall(460,100,400,170)
     wallMiddle4 = Wall(0,0,0,0)
     topDoor = Wall(0,0,0,0)
     bottomDoor = Wall(570,620,150,40)
     rightDoor = Wall(0,0,0,0)
     leftDoor = Wall(0,0,0,0)
 
-class Fireball(pygame.sprite.Sprite):
-     def __init__(self):
-        super(Fireball, self).__init__()
-        self.surf = pygame.image.load('graphics/fireballD1.png')
-        self.surf = pygame.transform.scale(self.surf,(50,70))
-        self.rect = self.surf.get_rect()
-        self.rect.move_ip(400,200)
-        self.moving_left = [pygame.transform.scale(pygame.image.load('graphics/fireballL1.png'),(92,124)),
-            pygame.transform.scale(pygame.image.load('graphics/fireballL2.png'),(92,124)),
-            pygame.transform.scale(pygame.image.load('graphics/fireballL3.png'),(92,124)),
-            pygame.transform.scale(pygame.image.load('graphics/fireballL4.png'),(92,124))]
 
 
 #use this to update the current room when changing rooms
@@ -710,29 +820,29 @@ def changeRooms(roomName):
     timer = 0
     global currentroom
     currentroom = roomName
+    #pygame.draw.rect(screen,(0,0,0), blackScreenFade, alpha = 0)
     #blackFadeScreen.set_alpha(0)
     #screen.blit(blackFadeScreen,(0,0))
     #while timer < 2550:
         #timer+=1
-        #print(timer)
         #blackFadeScreen.set_alpha(timer%10)
         #blackFadeScreen.set_alpha(100)
         #screen.blit(blackFadeScreen,(0,0))
 
 
-fadeAlpha = 1
+#fadeAlpha = 1
 
 def checkCollision(self, sprite1, sprite2):
     col = pygame.sprite.collide_rect(sprite1, sprite2)
     return(col)
 
-
+fireball = Fireball()
 icenova = IceNova()
 slime1 = Slime(800,400)
 slime2 = Slime(200,400)
 player = Player()
 firstroom = room1()
-bosskey = Key()
+bosskey = Key(key_room,key_slime)
 secondroom = Room2('graphics/room4.png')
 thirdroom = Room3('graphics/room5b.png')
 fourthroom = Room4('graphics/room6.png')
@@ -743,9 +853,10 @@ sprites_walls = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 
 ## add monster sprites to this group to draw them to the screen
+#sprites_alive.add(player)
 sprites_alive.add(slime1)
 sprites_alive.add(slime2)
-sprites_alive.add(player)
+
 #sprites_alive.add(icenova)
 
 
@@ -758,9 +869,13 @@ while not done:
         for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                         done = True
-
         #pygame.draw.rect(screen,(255,0,0), (player.rect),0)
         pressed_keys = pygame.key.get_pressed()
+
+
+        #print(slime1.isDying)
+        #print(slime1.current_frame)
+        #print(slime1.dyingtime)
 
         screen.blit(currentroom.roomimage,(0,0))
 
@@ -768,8 +883,9 @@ while not done:
             icenova.update()
             screen.blit(icenova.surf,icenova.rect)
 
+
 ####### drawing spell icons #################################
-        if (player.mana >=5):
+        if (player.mana >=5 and player.fireCountingCooldown == False):
             screen.blit(fireballicon,(800,10))
         else :
             screen.blit(fireballicongrey,(800,10))
@@ -783,14 +899,69 @@ while not done:
         else :
             screen.blit(icenovaicongrey,(1000,10))
 
+########### Key stuff here ##################
+
+        if (currentroom == fourthroom and player.hasKey == False and bosskey.room == 4):
+            if (bosskey.slimenum == 1):
+                bosskey.update(slime1.rect)
+                screen.blit(bosskey.surf,bosskey.rect)
+                if(pygame.Rect.colliderect(player.hitbox, bosskey.rect) and slime1.isAlive == False):
+                    player.hasKey = True
+            elif (bosskey.slimenum == 2):
+                bosskey.update(slime2.rect)
+                screen.blit(bosskey.surf,bosskey.rect)
+                if(pygame.Rect.colliderect(player.hitbox, bosskey.rect) and slime2.isAlive == False):
+                    player.hasKey = True
+        elif (currentroom == firstroom and player.hasKey == False and bosskey.room == 1):
+            if (bosskey.slimenum == 1):
+                bosskey.update(slime1.rect)
+                screen.blit(bosskey.surf,bosskey.rect)
+                if(pygame.Rect.colliderect(player.hitbox, bosskey.rect) and slime1.isAlive == False):
+                    player.hasKey = True
+            elif (bosskey.slimenum == 2):
+                bosskey.update(slime2.rect)
+                screen.blit(bosskey.surf,bosskey.rect)
+                if(pygame.Rect.colliderect(player.hitbox, bosskey.rect) and slime2.isAlive == False):
+                    player.hasKey = True
+        elif (currentroom == thirdroom and player.hasKey == False and bosskey.room == 3):
+            if (bosskey.slimenum == 1):
+                bosskey.update(slime1.rect)
+                screen.blit(bosskey.surf,bosskey.rect)
+                if(pygame.Rect.colliderect(player.hitbox, bosskey.rect) and slime1.isAlive == False):
+                    player.hasKey = True
+            elif (bosskey.slimenum == 2):
+                bosskey.update(slime2.rect)
+                screen.blit(bosskey.surf,bosskey.rect)
+                if(pygame.Rect.colliderect(player.hitbox, bosskey.rect) and slime2.isAlive == False):
+                    player.hasKey = True
+        elif (currentroom == secondroom and player.hasKey == False and bosskey.room == 2):
+            if (bosskey.slimenum == 1):
+                bosskey.update(slime1.rect)
+                screen.blit(bosskey.surf,bosskey.rect)
+                if(pygame.Rect.colliderect(player.hitbox, bosskey.rect) and slime1.isAlive == False):
+                    player.hasKey = True
+            elif (bosskey.slimenum == 2):
+                bosskey.update(slime2.rect)
+                screen.blit(bosskey.surf,bosskey.rect)
+                if(pygame.Rect.colliderect(player.hitbox, bosskey.rect) and slime2.isAlive == False):
+                    player.hasKey = True
+
+
         for entity in sprites_alive: #this draws the sprites in the sprites_alive group (player and monsters)
             screen.blit(entity.surf, entity.rect)
 
+        screen.blit(player.surf, player.rect)
+        if (player.spawnFireball == True):
+            fireball.update()
+            screen.blit(fireball.surf,fireball.rect)
 
-        if currentroom == fourthroom and player.hasKey == False:
-            screen.blit(bosskey.surf,bosskey.rect)
 
+        #else :
+            #bosskey.rect.x = -100
+            #bosskey.rect.y = -100
 
+    #self.room = roomnum
+    #self.slimenum = slimenum
 
         pygame.draw.rect(screen,(255,0,0), (102,25,player.health*5,30),0) #draws the health bar
         pygame.draw.rect(screen,(0,0,255), (102,68,player.mana*5,30),0) #draws the mana bar
@@ -800,20 +971,18 @@ while not done:
         #pygame.draw.rect(screen,(255,0,0),(slime1.rect), 0)
         #pygame.draw.rect(screen,(0,0,255),player.hitbox,0)
 ###############These if statements check for collision with player and walls and if true sets the players speed to 0###############
-        if(currentroom == fourthroom):
-            if (checkCollision(pygame.sprite.Sprite,player, bosskey)):
-                player.hasKey = True
 
-        if (checkCollision(pygame.sprite.Sprite, player,currentroom.wallLeft1) or checkCollision(pygame.sprite.Sprite, player,currentroom.wallLeft2)):
+
+        if (pygame.Rect.colliderect(player.hitbox, currentroom.wallLeft1) or pygame.Rect.colliderect(player.hitbox, currentroom.wallLeft2)):
             player.leftspeed =0
-        if (checkCollision(pygame.sprite.Sprite, player,currentroom.wallRight1) or checkCollision(pygame.sprite.Sprite, player,currentroom.wallRight2)):
+        if (pygame.Rect.colliderect(player.hitbox, currentroom.wallRight1) or pygame.Rect.colliderect(player.hitbox, currentroom.wallRight2)):
             player.rightspeed =0
-        if (checkCollision(pygame.sprite.Sprite, player,currentroom.wallTop1) or checkCollision(pygame.sprite.Sprite, player,currentroom.wallTop2)):
+        if (pygame.Rect.colliderect(player.hitbox, currentroom.wallTop1) or pygame.Rect.colliderect(player.hitbox, currentroom.wallTop2)):
             player.upspeed = 0
-        if (checkCollision(pygame.sprite.Sprite, player,currentroom.wallBottom1) or checkCollision(pygame.sprite.Sprite, player,currentroom.wallBottom2)):
+        if (pygame.Rect.colliderect(player.hitbox, currentroom.wallBottom1) or pygame.Rect.colliderect(player.hitbox, currentroom.wallBottom2)):
             player.downspeed = 0
-        if (checkCollision(pygame.sprite.Sprite, player, currentroom.wallMiddle) or checkCollision(pygame.sprite.Sprite, player, currentroom.wallMiddle2) or checkCollision(pygame.sprite.Sprite, player, currentroom.wallMiddle3) or
-        checkCollision(pygame.sprite.Sprite, player, currentroom.wallMiddle4)):
+        if (pygame.Rect.colliderect(player.hitbox, currentroom.wallMiddle) or pygame.Rect.colliderect(player.hitbox, currentroom.wallMiddle2) or pygame.Rect.colliderect(player.hitbox, currentroom.wallMiddle3) or
+        pygame.Rect.colliderect(player.hitbox, currentroom.wallMiddle4)):
             if (player.direction == 1):
                 player.upspeed =0
                 player.rect.move_ip(0, 1)
@@ -833,6 +1002,7 @@ while not done:
             if (currentroom == thirdroom and player.direction == 1):
                 player.upspeed = 0
                 player.rect.move_ip(0,-2)
+                player.hitbox.move_ip(0,-2)
                 player.falling = True
                 player.fallingTime +=1
                 if (player.fallingTime % 30 == 0):
@@ -862,6 +1032,7 @@ while not done:
             if (currentroom == thirdroom and player.direction == 2):
                 player.upspeed = 0
                 player.rect.move_ip(2,0)
+                player.hitbox.move_ip(2,0)
                 player.falling = True
                 player.fallingTime +=1
                 if (player.fallingTime % 30 == 0):
@@ -876,6 +1047,7 @@ while not done:
             if (currentroom == thirdroom and player.direction == 3):
                 player.upspeed = 0
                 player.rect.move_ip(0,2)
+                player.hitbox.move_ip(0,2)
                 player.falling = True
                 player.fallingTime +=1
                 if (player.fallingTime % 30 == 0):
@@ -890,55 +1062,146 @@ while not done:
 
 ###############These check for collision with the doors and loads new rooms and moves player#####################
         if (checkCollision(pygame.sprite.Sprite, player, currentroom.topDoor)):
+            slime1.newInstruction = True
+            slime2.newInstruction = True
             if (currentroom == firstroom):
                 changeRooms(secondroom)
+                slime1.isSpawning = True
+                slime1.spawn(100,100)
+                slime2.isSpawning = True
+                slime2.spawn(900,500)
                 player.rect.move_ip(0,500)
                 player.hitbox.move_ip(0,500)
             elif (currentroom == thirdroom):
                 changeRooms(fourthroom)
+                slime1.isSpawning = True
+                slime1.spawn(300,400)
+                slime2.isSpawning = True
+                slime2.spawn(900,200)
                 player.rect.move_ip(0,500)
                 player.hitbox.move_ip(0,500)
             elif (currentroom == fourthroom and player.hasKey == True):
                 changeRooms(bossroom)
+                slime1.isAlive = False
+                slime2.isAlive = False
                 player.rect.move_ip(0,500)
-                player.hitibox.move_ip(0,500)
+                player.hitbox.move_ip(0,500)
+                slime1.rect.move_ip(10000,1000)
+                slime1.hitbox.move_ip(10000,1000)
+                slime2.rect.move_ip(10000,1000)
+                slime2.hitbox.move_ip(10000,1000)
             elif (currentroom == fourthroom and player.hasKey == False):
                 player.upspeed = 0
         if (checkCollision(pygame.sprite.Sprite, player, currentroom.bottomDoor)):
+            slime1.newInstruction = True
+            slime2.newInstruction = True
             if (currentroom == secondroom):
                 changeRooms(firstroom)
+                slime1.isSpawning = True
+                slime1.spawn(800,400)
+                slime2.isSpawning = True
+                slime2.spawn(200,400)
+                player.rect.move_ip(0,-500)
+                player.hitbox.move_ip(0,-500)
             elif (currentroom == fourthroom):
                 changeRooms(thirdroom)
+                slime1.isSpawning = True
+                slime1.spawn(500,300)
+                slime2.isSpawning = True
+                slime2.spawn(900,500)
+                player.rect.move_ip(0,-500)
+                player.hitbox.move_ip(0,-500)
             elif (currentroom == bossroom):
-                changeRooms(fourthroom)
-            player.rect.move_ip(0,-500)
-            player.hitbox.move_ip(0,-500)
+                player.downspeed = 0
+                #changeRooms(fourthroom)
+                #slime1.isSpawning = True
+                #slime1.spawn(300,400)
+                #slime2.isSpawning = True
+                #slime2.spawn(900,200)
+
         if (checkCollision(pygame.sprite.Sprite, player, currentroom.rightDoor)):
+            slime1.newInstruction = True
+            slime2.newInstruction = True
             if (currentroom == firstroom):
                 changeRooms(thirdroom)
+                slime1.isSpawning = True
+                slime1.spawn(500,300)
+                slime2.isSpawning = True
+                slime2.spawn(900,500)
             elif (currentroom == secondroom):
                 changeRooms(fourthroom)
+                slime1.isSpawning = True
+                slime1.spawn(300,400)
+                slime2.isSpawning = True
+                slime2.spawn(900,200)
             player.rect.move_ip(-1030,0)
             player.hitbox.move_ip(-1030,0)
         if (checkCollision(pygame.sprite.Sprite, player, currentroom.leftDoor)):
+            slime1.newInstruction = True
+            slime2.newInstruction = True
             if (currentroom == thirdroom):
                 changeRooms(firstroom)
+                slime1.isSpawning = True
+                slime1.spawn(800,400)
+                slime2.isSpawning = True
+                slime2.spawn(200,400)
             elif (currentroom == fourthroom):
                 changeRooms(secondroom)
+                slime1.isSpawning = True
+                slime1.spawn(100,100)
+                slime2.isSpawning = True
+                slime2.spawn(900,500)
+                #player.rect.move_ip(0,500)
             player.rect.move_ip(1020,0)
             player.hitbox.move_ip(1020,0)
 
 
+################ Fireball stuff #######################
+        #if (player.spawnFireball == True):
+            #fireball.isActive = True
+            #player.spawnFireball = False
+
+
 ################Spell collision with slime ###########################
         if (checkCollision(pygame.sprite.Sprite, icenova, slime1)):
-            if (icenova.canFreeze == True):
+            if (icenova.canFreeze == True and slime1.isAlive == True):
                 slime1.frozen = True
                 slime1.speed = 0
+        if (checkCollision(pygame.sprite.Sprite, icenova, slime2)):
+            if (icenova.canFreeze == True and slime2.isAlive == True):
+                slime2.frozen = True
+                slime2.speed = 0
+        if (pygame.Rect.colliderect(slime1.hitbox, fireball.rect)):
+            if (slime1.isAlive == True and fireball.isActive == True):
+                slime1.isDying = True
+                slime1.current_frame = 0
+                slime1.isAlive = False
+        if (pygame.Rect.colliderect(slime2.hitbox, fireball.rect)):
+            if (slime2.isAlive == True and fireball.isActive == True):
+                slime2.isDying = True
+                slime2.current_frame = 0
+                slime2.isAlive = False
+                #slime1.die()
+
+############### Slime on Slime collision######################
+        if (pygame.Rect.colliderect(slime1.hitbox, slime2.hitbox)):
+            if (slime1.direction == 1 and slime1.isAlive == True and slime2.isAlive == True):
+                slime1.direction = 0
+                slime2.direction = 1
+            elif (slime1.direction==0 and slime1.isAlive == True and slime2.isAlive == True):
+                slime1.direction = 1
+                slime2.direction = 0
+            elif (slime1.direction==2 and slime1.isAlive == True and slime2.isAlive == True):
+                slime1.direction = 3
+                slime2.direction = 2
+            elif (slime1.direction ==3 and slime1.isAlive == True and slime2.isAlive == True):
+                slime1.direction = 2
+                slime2.direction = 3
 
 ############### Player Collision with slime ##########################
         #if (checkCollision(pygame.sprite.Sprite, player,slime1)):
         if (pygame.Rect.colliderect(player.hitbox, slime1.hitbox)):
-            if (slime1.frozen == True):
+            if (slime1.frozen == True and slime1.isAlive == True):
                 if (player.direction == 1):
                     player.upspeed =0
                     player.rect.move_ip(0, 1)
@@ -955,12 +1218,30 @@ while not done:
                     player.leftspeed =0
                     player.rect.move_ip(1, 0)
                     player.hitbox.move_ip(1, 0)
-            #else :
-                #player.hit(slime1.direction)
 
-        player.update(pressed_keys) ###this calls the update method in player which checks for keypresses and handles movement/attacks
+        if (pygame.Rect.colliderect(player.hitbox, slime2.hitbox)):
+            if (slime2.frozen == True and slime2.isAlive == True):
+                if (player.direction == 1):
+                    player.upspeed =0
+                    player.rect.move_ip(0, 1)
+                    player.hitbox.move_ip(0, 1)
+                if (player.direction==2):
+                    player.rightspeed = 0
+                    player.rect.move_ip(-1, 0)
+                    player.hitbox.move_ip(-1, 0)
+                if (player.direction==3):
+                    player.downspeed = 0
+                    player.rect.move_ip(0, -1)
+                    player.hitbox.move_ip(0, -1)
+                if (player.direction ==4):
+                    player.leftspeed =0
+                    player.rect.move_ip(1, 0)
+                    player.hitbox.move_ip(1, 0)
+        
         slime1.update()
         slime2.update()
+        player.update(pressed_keys) ###this calls the update method in player which checks for keypresses and handles movement/attacks
+
         #use the following for collision detection between player and enemies
         #if pygame.sprite.spritecollideany(player, enemies):
             #player takes damage and is pushed back?
