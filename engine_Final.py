@@ -23,12 +23,7 @@ fireballicon = pygame.transform.scale(fireballicon,(80,76))
 fireballicongrey = pygame.image.load('graphics/fireballicongrey.png')
 fireballicongrey = fireballicongrey.convert()
 fireballicongrey = pygame.transform.scale(fireballicongrey,(80,76))
-lightningicon = pygame.image.load('graphics/lightningicon.png')
-lightningicon = lightningicon.convert()
-lightningicon = pygame.transform.scale(lightningicon,(80,76))
-lightningicongrey = pygame.image.load('graphics/lightningicongrey.png')
-lightningicongrey = lightningicongrey.convert()
-lightningicongrey = pygame.transform.scale(lightningicongrey,(80,76))
+
 #blackFadeScreen.fill((255,255,255))
 #blackFadeScreen.setAlpha()
 done = False
@@ -565,7 +560,7 @@ class Slime(pygame.sprite.Sprite):
             #print("HIT------------")
             self.touchingPlayer = True
         
-        if (self.touchingPlayer == True and player.invulnerable == False):
+        if (self.touchingPlayer == True and player.invulnerable == False and self.isAlive == True):
             if (player.hitbox.x > self.hitbox.x) and (player.hitbox.y > self.hitbox.y):
                 player.rect.move_ip(player.speed*10,player.speed*10)
                 player.hitbox.move_ip(player.speed*10,player.speed*10)
@@ -931,10 +926,6 @@ while not done:
             else :
                 screen.blit(fireballicongrey,(800,10))
 
-            if (player.mana >=20):
-                screen.blit(lightningicon,(900,10))
-            else :
-                screen.blit(lightningicongrey,(900,10))
             if (player.startCountingCooldown == False and player.mana >=10):
                 screen.blit(icenovaicon,(1000,10))
             else :
